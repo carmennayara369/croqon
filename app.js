@@ -41,7 +41,7 @@ class App {
         return defaultProducts;
       }
       const products = JSON.parse(stored);
-      // Hotfix database migration: Set the new custom images as default for jamon-iberico, manchego-serrano & chorizo-iberico
+      // Hotfix database migration: Set the new custom images as default for jamon-iberico, manchego-serrano, chorizo-iberico & manchego-semicurado
       let modified = false;
       const jamon = products.find(p => p.id === "jamon-iberico");
       if (jamon && jamon.imagePath !== "assets/images/product_jamon_iberico.jpg") {
@@ -59,6 +59,12 @@ class App {
       if (chorizo && chorizo.imagePath !== "assets/images/product_chorizo_iberico.jpg") {
         chorizo.imagePath = "assets/images/product_chorizo_iberico.jpg";
         chorizo.imageType = "file";
+        modified = true;
+      }
+      const manchegoSemi = products.find(p => p.id === "manchego-semicurado");
+      if (manchegoSemi && manchegoSemi.imagePath !== "assets/images/product_manchego_semicurado.jpg") {
+        manchegoSemi.imagePath = "assets/images/product_manchego_semicurado.jpg";
+        manchegoSemi.imageType = "file";
         modified = true;
       }
       if (modified) {

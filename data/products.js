@@ -14,8 +14,9 @@ export const products = [
     flavorProfile_en: "Cheese / Creamy",
     ingredients: "Leche entera, queso Manchego semicurado (12%), harina de trigo, mantequilla, pan rallado, huevo, sal, gelatina.",
     allergens: ["Gluten", "Lácteos", "Huevo"],
-    imageType: "grid",
+    imageType: "file",
     imageClass: "img-manchego-semi",
+    imagePath: "assets/images/product_manchego_semicurado.jpg",
     badge: "Receta Cremosa",
     badge_en: "Creamy Recipe"
   },
