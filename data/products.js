@@ -71,8 +71,9 @@ export const products = [
     flavorProfile_en: "Iberian / Premium",
     ingredients: "Leche entera, jamón ibérico de bellota (18%), harina de trigo, mantequilla de Soria, caldo de jamón, pan rallado, huevo, sal.",
     allergens: ["Gluten", "Lácteos", "Huevo"],
-    imageType: "grid",
+    imageType: "file",
     imageClass: "img-jamon-iberico",
+    imagePath: "assets/images/product_jamon_iberico.jpg",
     badge: "Joyas Gastronómicas",
     badge_en: "Gastronomic Jewel"
   },

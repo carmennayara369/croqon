@@ -40,7 +40,15 @@ class App {
         localStorage.setItem("croqon_b2b_products", JSON.stringify(defaultProducts));
         return defaultProducts;
       }
-      return JSON.parse(stored);
+      const products = JSON.parse(stored);
+      // Hotfix database migration: Set the new custom image as default for jamon-iberico
+      const jamon = products.find(p => p.id === "jamon-iberico");
+      if (jamon && jamon.imagePath !== "assets/images/product_jamon_iberico.jpg") {
+        jamon.imagePath = "assets/images/product_jamon_iberico.jpg";
+        jamon.imageType = "file";
+        this.saveProducts(products); // Sync local & Plesk backend automatically!
+      }
+      return products;
     } catch (e) {
       console.error("Failed to load products from storage", e);
       return defaultProducts;
