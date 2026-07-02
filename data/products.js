@@ -52,8 +52,9 @@ export const products = [
     flavorProfile_en: "Mixed / Traditional",
     ingredients: "Leche entera, queso Manchego semicurado (8%), jamón serrano (8%), harina de trigo, mantequilla, pan rallado, huevo, sal.",
     allergens: ["Gluten", "Lácteos", "Huevo"],
-    imageType: "grid",
+    imageType: "file",
     imageClass: "img-manchego-serrano",
+    imagePath: "assets/images/product_manchego_serrano.jpg",
     badge: "Equilibrio Perfecto",
     badge_en: "Perfect Balance"
   },

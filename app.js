@@ -41,11 +41,21 @@ class App {
         return defaultProducts;
       }
       const products = JSON.parse(stored);
-      // Hotfix database migration: Set the new custom image as default for jamon-iberico
+      // Hotfix database migration: Set the new custom images as default for jamon-iberico & manchego-serrano
+      let modified = false;
       const jamon = products.find(p => p.id === "jamon-iberico");
       if (jamon && jamon.imagePath !== "assets/images/product_jamon_iberico.jpg") {
         jamon.imagePath = "assets/images/product_jamon_iberico.jpg";
         jamon.imageType = "file";
+        modified = true;
+      }
+      const manchegoSerrano = products.find(p => p.id === "manchego-serrano");
+      if (manchegoSerrano && manchegoSerrano.imagePath !== "assets/images/product_manchego_serrano.jpg") {
+        manchegoSerrano.imagePath = "assets/images/product_manchego_serrano.jpg";
+        manchegoSerrano.imageType = "file";
+        modified = true;
+      }
+      if (modified) {
         this.saveProducts(products); // Sync local & Plesk backend automatically!
       }
       return products;
