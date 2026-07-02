@@ -45,9 +45,14 @@ class App {
     }
   }
 
-  saveProducts(products) {
+  async saveProducts(products) {
     try {
       localStorage.setItem("croqon_b2b_products", JSON.stringify(products));
+      await fetch("api.php?action=save_products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(products)
+      });
     } catch (e) {
       console.error("Failed to save products to storage", e);
     }
@@ -78,11 +83,49 @@ class App {
     }
   }
 
-  saveClients(clients) {
+  async saveClients(clients) {
     try {
       localStorage.setItem("croqon_b2b_clients", JSON.stringify(clients));
+      await fetch("api.php?action=save_clients", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(clients)
+      });
     } catch (e) {
       console.error("Failed to save clients to storage", e);
+    }
+  }
+
+  async syncWithServer() {
+    try {
+      // Fetch products
+      const resProds = await fetch("api.php?action=get_products");
+      if (resProds.ok) {
+        const prods = await resProds.json();
+        if (prods && prods.length > 0) {
+          localStorage.setItem("croqon_b2b_products", JSON.stringify(prods));
+        }
+      }
+
+      // Fetch clients
+      const resClients = await fetch("api.php?action=get_clients");
+      if (resClients.ok) {
+        const clients = await resClients.json();
+        if (clients && clients.length > 0) {
+          localStorage.setItem("croqon_b2b_clients", JSON.stringify(clients));
+        }
+      }
+
+      // Fetch orders
+      const resOrders = await fetch("api.php?action=get_orders");
+      if (resOrders.ok) {
+        const orders = await resOrders.json();
+        if (orders) {
+          localStorage.setItem("croqon_b2b_orders", JSON.stringify(orders));
+        }
+      }
+    } catch (e) {
+      console.warn("Server database sync failed (using local offline cache):", e);
     }
   }
 
@@ -113,14 +156,18 @@ class App {
     });
 
     // Check routing on init
-    const hash = window.location.hash.substring(1);
-    if (hash === "admin") {
-      this.navigate("admin");
-    } else if (this.user) {
-      this.navigate("catalog");
-    } else {
-      this.navigate("home");
-    }
+    const initRoute = async () => {
+      await this.syncWithServer();
+      const hash = window.location.hash.substring(1);
+      if (hash === "admin") {
+        this.navigate("admin");
+      } else if (this.user) {
+        this.navigate("catalog");
+      } else {
+        this.navigate("home");
+      }
+    };
+    initRoute();
 
     // Set initial header layout and badge
     this.updateHeaderContent();
@@ -130,7 +177,10 @@ class App {
     this.setupGlobalEvents();
   }
 
-  navigate(route) {
+  async navigate(route) {
+    // Pull fresh data from Plesk backend API before rendering
+    await this.syncWithServer();
+
     if (route === "admin") {
       this.currentRoute = "admin";
       window.location.hash = "admin";
