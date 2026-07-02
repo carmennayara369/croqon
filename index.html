@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- SEO Best Practices -->
+  <title>Croqon - Croquetas Gourmet Premium para Hostelería y Chefs</title>
+  <meta name="description" content="Portal de venta exclusivo para profesionales de la hostelería en Málaga y Costa del Sol. Croquetas gourmet ultracongeladas con calidad consistente para restaurantes, hoteles y beach clubs.">
+  <meta name="keywords" content="croquetas gourmet, croquetas premium, hosteleria, marbella, malaga, croquetas congeladas, B2B e-commerce, croquetas para restaurantes">
+  
+  <!-- Favicon Mock -->
+  <link rel="icon" type="image/png" href="assets/images/logo_banner.png">
+
+  <!-- Google Fonts - Poppins for ultimate readability and modern elegance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+
+  <!-- Global Application Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <a href="#" id="header-logo-link" class="logo-container">
+        <img src="assets/images/clean_logo.png" alt="Croqon" class="header-logo">
+        <span class="logo-subtitle">PREMIUM CROQUETAS</span>
+      </a>
+      
+      <nav class="header-nav">
+        <!-- Will show either "Vitrina" or "Suministro Pro" links -->
+        <div id="header-nav-content"></div>
+      </nav>
+
+      <div class="header-actions" id="header-actions-content">
+        <!-- Dynamic: "Acceso Pro" button for public, or "Cart" icon for B2B -->
+      </div>
+    </div>
+  </header>
+
+  <!-- Main SPA Content -->
+  <main id="main-container" class="gateway-view-active">
+    <div id="main-content">
+      <!-- Views will be loaded here dynamically by app.js -->
+      <div class="initial-app-loader">
+        <div class="spinner"></div>
+        <p>Cargando portal Croqon...</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Supply Chain Footer -->
+  <footer class="app-footer">
+    <div class="footer-container">
+      <div class="footer-col-brand">
+        <div class="footer-logo-container">
+          <img src="assets/images/clean_logo.png" alt="Croqon Logo" class="footer-logo">
+          <span class="footer-logo-subtitle">PREMIUM CROQUETAS</span>
+        </div>
+        <p class="brand-slogan">Consistency. Quality. Excellence.</p>
+        <p class="brand-copyright">© 2026 CROQON. Todos los derechos reservados. Venta mayorista exclusiva a profesionales. <a href="#admin" class="footer-admin-link">Administración</a></p>
+      </div>
+      
+      <div class="footer-col-info">
+        <h4>Formato Profesional</h4>
+        <p>Suministrado en cajas optimizadas de <strong>150 unidades</strong> de <strong>30g</strong> cada una. Producto ultracongelado listo para freír. Calidad consistente testada para freidoras industriales a 180°C.</p>
+      </div>
+
+      <div class="footer-col-logistics">
+        <h4>Cobertura y Logística</h4>
+        <p>Entregas directas mediante camión refrigerado certificado (-18°C) en toda la Costa del Sol (Málaga, Torremolinos, Fuengirola, Marbella, Estepona).</p>
+        <p class="delivery-days"><strong>Reparto Semanal:</strong> Martes y Viernes (08:00 - 14:00)</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Application Entry Point -->
+  <script type="module" src="app.js"></script>
+</body>
+</html>
