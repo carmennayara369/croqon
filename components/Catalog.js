@@ -1,5 +1,3 @@
-
-
 export default class Catalog {
   constructor(app) {
     this.app = app;
@@ -15,15 +13,15 @@ export default class Catalog {
     const dbProducts = this.app.getProducts();
     const filteredProducts = this.currentFilter === "todos" 
       ? dbProducts 
-      : dbProducts.filter(p => p.flavorProfile.toLowerCase().includes(this.currentFilter));
+      : dbProducts.filter(p => p.flavorProfile.toLowerCase().includes(this.currentFilter) || (p.flavorProfile_en && p.flavorProfile_en.toLowerCase().includes(this.currentFilter)));
 
     container.innerHTML = `
       <div class="catalog-layout fade-in">
         <!-- B2B Header Info -->
         <header class="catalog-header">
           <div class="header-left">
-            <h1 class="serif-title golden-text">Gama de Croquetas Gourmet</h1>
-            <p class="subtitle">Suministro directo para hostelería profesional en Costa del Sol</p>
+            <h1 class="serif-title golden-text">${this.app.t("cat_title", "Gama de Croquetas Gourmet")}</h1>
+            <p class="subtitle">${this.app.t("cat_desc", "Suministro directo para hostelería profesional en Costa del Sol")}</p>
           </div>
           <div class="header-right">
             <div class="client-badge">
@@ -33,9 +31,9 @@ export default class Catalog {
                 <span class="cif-label">CIF: ${this.app.user.cif}</span>
               </div>
             </div>
-            <button id="btn-logout" class="btn-text" title="Cambiar Razón Social">
+            <button id="btn-logout" class="btn-text" title="${this.app.lang === "en" ? "Change business session" : "Cambiar Razón Social"}">
               <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
-              <span>Salir</span>
+              <span>${this.app.t("nav_logout", "Salir")}</span>
             </button>
           </div>
         </header>
@@ -45,29 +43,29 @@ export default class Catalog {
           <div class="promise-item">
             <svg class="promise-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18V9a6 6 0 0 1 12 0v9M3 18h18a1 1 0 0 1 1 1v2H2v-2a1 1 0 0 1 1-1zM12 3v3"/></svg>
             <div class="promise-text">
-              <h4>Para Chefs Exigentes</h4>
-              <p>Calidad consistente en cocina</p>
+              <h4>${this.app.lang === "en" ? "For Demanding Chefs" : "Para Chefs Exigentes"}</h4>
+              <p>${this.app.lang === "en" ? "Consistent quality in kitchen" : "Calidad consistente en cocina"}</p>
             </div>
           </div>
           <div class="promise-item">
             <svg class="promise-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><path d="M20 16l-4-4 4-4M4 8l4 4-4 4M16 4l-4 4-4-4M8 20l4-4 4 4"/></svg>
             <div class="promise-text">
-              <h4>Siempre Congelado</h4>
-              <p>Conservar a -18°C</p>
+              <h4>${this.app.lang === "en" ? "Always Frozen (-18°C)" : "Siempre Congelado"}</h4>
+              <p>${this.app.lang === "en" ? "Store at -18°C" : "Conservar a -18°C"}</p>
             </div>
           </div>
           <div class="promise-item">
             <svg class="promise-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
             <div class="promise-text">
-              <h4>Cajas de 150 Uds</h4>
-              <p>Formatos pro de 30g/ud</p>
+              <h4>${this.app.lang === "en" ? "150 Units per Box" : "Cajas de 150 Uds"}</h4>
+              <p>${this.app.lang === "en" ? "Pro 30g formats" : "Formatos pro de 30g/ud"}</p>
             </div>
           </div>
           <div class="promise-item">
             <svg class="promise-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v4M18 10h4l2 3v4a1 1 0 0 1-1 1h-3M14 18H8M14 18a2.5 2.5 0 1 1 5 0M8 18a2.5 2.5 0 1 1-5 0"/></svg>
             <div class="promise-text">
-              <h4>Entrega Costa del Sol</h4>
-              <p>2 veces por semana (Mar. y Vie.)</p>
+              <h4>${this.app.lang === "en" ? "Costa del Sol Delivery" : "Entrega Costa del Sol"}</h4>
+              <p>${this.app.lang === "en" ? "Twice weekly (Tue. & Fri.)" : "2 veces por semana (Mar. y Vie.)"}</p>
             </div>
           </div>
         </section>
@@ -77,10 +75,10 @@ export default class Catalog {
           <!-- Catalog List (Left) -->
           <div class="products-section">
             <div class="filter-bar">
-              <button class="filter-btn ${this.currentFilter === "todos" ? "active" : ""}" data-filter="todos">Toda la Colección</button>
-              <button class="filter-btn ${this.currentFilter === "iberico" ? "active" : ""}" data-filter="iberico">Gama Ibérica</button>
-              <button class="filter-btn ${this.currentFilter === "cheese" ? "active" : ""}" data-filter="cheese">Gama Quesos</button>
-              <button class="filter-btn" id="btn-view-sheet">Ver Ficha Técnica Jamón</button>
+              <button class="filter-btn ${this.currentFilter === "todos" ? "active" : ""}" data-filter="todos">${this.app.t("cat_filter_all", "Toda la Colección")}</button>
+              <button class="filter-btn ${this.currentFilter === "iberico" ? "active" : ""}" data-filter="iberico">${this.app.t("cat_filter_ham", "Gama Ibérica")}</button>
+              <button class="filter-btn ${this.currentFilter === "cheese" ? "active" : ""}" data-filter="cheese">${this.app.t("cat_filter_cheese", "Gama Quesos")}</button>
+              <button class="filter-btn" id="btn-view-sheet">${this.app.lang === "en" ? "View Ham Technical Sheet" : "Ver Ficha Técnica Jamón"}</button>
             </div>
 
             <div class="products-list">
@@ -91,7 +89,7 @@ export default class Catalog {
           <!-- Order & Summary Panel (Right) -->
           <aside class="order-summary-sidebar">
             <div class="sticky-sidebar">
-              <h3 class="serif-title golden-text sidebar-title">Resumen de Pedido</h3>
+              <h3 class="serif-title golden-text sidebar-title">${this.app.t("cat_summary_title", "Resumen de Pedido")}</h3>
               <div id="sidebar-cart-content">
                 <!-- Cart items will be rendered here dynamically -->
                 ${this.renderSidebarCart()}
@@ -119,37 +117,42 @@ export default class Catalog {
     const cartItem = this.app.cart.items.find(item => item.id === product.id);
     const quantity = cartItem ? cartItem.quantity : 0;
 
+    const name = this.app.lang === "en" && product.name_en ? product.name_en : product.name;
+    const description = this.app.lang === "en" && product.description_en ? product.description_en : product.description;
+    const flavorProfile = this.app.lang === "en" && product.flavorProfile_en ? product.flavorProfile_en : product.flavorProfile;
+    const badge = this.app.lang === "en" && product.badge_en ? product.badge_en : product.badge;
+
     return `
       <div class="product-card" id="card-${product.id}">
         <div class="product-visual">
           <div class="product-crop ${product.imagePath ? "" : product.imageClass}" ${product.imagePath ? `style="background-image: url('${product.imagePath}'); background-size: cover; background-position: center;"` : ""}></div>
-          <span class="product-badge">${product.badge}</span>
+          <span class="product-badge">${badge}</span>
         </div>
         <div class="product-info">
           <div class="product-header">
-            <h3 class="serif-title">${product.name}</h3>
-            <span class="product-flavor">${product.flavorProfile}</span>
+            <h3 class="serif-title">${name}</h3>
+            <span class="product-flavor">${flavorProfile}</span>
           </div>
-          <p class="product-desc">${product.description}</p>
+          <p class="product-desc">${description}</p>
           
           <div class="product-specs">
-            <span class="spec-tag">Caja de ${product.units} unidades</span>
-            <span class="spec-tag">Peso neto: 4,5 kg (30g/ud)</span>
+            <span class="spec-tag">${this.app.lang === "en" ? `Box of ${product.units} units` : `Caja de ${product.units} unidades`}</span>
+            <span class="spec-tag">${this.app.lang === "en" ? "Net weight: 4.5 kg (30g/unit)" : "Peso neto: 4,5 kg (30g/ud)"}</span>
           </div>
 
           <details class="product-details-dropdown">
-            <summary>Ver ingredientes y alérgenos</summary>
+            <summary>${this.app.lang === "en" ? "View ingredients and allergens" : "Ver ingredientes y alérgenos"}</summary>
             <div class="details-dropdown-content">
-              <p><strong>Ingredientes:</strong> ${product.ingredients}</p>
-              <p><strong>Alérgenos:</strong> ${product.allergens.map(a => `<span class="allergen-tag">${a}</span>`).join(" ")}</p>
-              <p><strong>Preparación:</strong> Freír directamente congelado a 180°C durante 3-4 minutos. Escurrir y servir.</p>
+              <p><strong>${this.app.lang === "en" ? "Ingredients:" : "Ingredientes:"}</strong> ${product.ingredients}</p>
+              <p><strong>${this.app.lang === "en" ? "Allergens:" : "Alérgenos:"}</strong> ${product.allergens.map(a => `<span class="allergen-tag">${a}</span>`).join(" ")}</p>
+              <p><strong>${this.app.lang === "en" ? "Preparation: Fry directly frozen at 180°C for 3-4 minutes. Drain and serve." : "Preparación: Freír directamente congelado a 180°C durante 3-4 minutos. Escurrir y servir."}</strong></p>
             </div>
           </details>
 
           <div class="product-footer-row">
             <div class="product-price-block">
-              <span class="price-label">Precio profesional (HT)</span>
-              <span class="price-value">${product.price.toFixed(2)} € <small>/caja</small></span>
+              <span class="price-label">${this.app.lang === "en" ? "Wholesale price (Excl. VAT)" : "Precio profesional (HT)"}</span>
+              <span class="price-value">${product.price.toFixed(2)} € <small>${this.app.lang === "en" ? "/box" : "/caja"}</small></span>
             </div>
             
             <div class="quantity-selector-block">
@@ -159,7 +162,7 @@ export default class Catalog {
                 <button class="qty-btn qty-plus" data-id="${product.id}">+</button>
               </div>
               <button class="btn-update-cart ${quantity > 0 ? "in-cart" : ""}" data-id="${product.id}">
-                ${quantity > 0 ? "Actualizar" : "Añadir"}
+                <span>${quantity > 0 ? this.app.t("cat_btn_update", "Actualizar") : this.app.t("cat_btn_add", "Añadir")}</span>
               </button>
             </div>
           </div>
@@ -174,8 +177,8 @@ export default class Catalog {
       return `
         <div class="empty-cart-state">
           <svg viewBox="0 0 24 24" width="34" height="34" stroke="currentColor" stroke-width="1.5" fill="none" style="margin: 0 auto 15px; display: block; color: var(--color-gold);"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
-          <p>No ha añadido ninguna caja a su pedido.</p>
-          <p class="hint">Modifique las cantidades en el listado para añadir productos.</p>
+          <p>${this.app.t("cat_summary_empty", "No ha añadido ninguna caja a su pedido.")}</p>
+          <p class="hint">${this.app.lang === "en" ? "Modify quantities in the catalog to prepare your shipment." : "Modifique las cantidades en el listado para añadir productos."}</p>
         </div>
       `;
     }
@@ -186,40 +189,43 @@ export default class Catalog {
 
     return `
       <div class="sidebar-cart-list">
-        ${cart.items.map(item => `
-          <div class="sidebar-cart-item">
-            <div class="item-name-block">
-              <span class="item-name">${item.name}</span>
-              <span class="item-meta">Caja de ${item.units} uds</span>
+        ${cart.items.map(item => {
+          const name = this.app.lang === "en" && item.name_en ? item.name_en : item.name;
+          return `
+            <div class="sidebar-cart-item">
+              <div class="item-name-block">
+                <span class="item-name">${name}</span>
+                <span class="item-meta">${this.app.lang === "en" ? `Box of ${item.units} uds` : `Caja de ${item.units} uds`}</span>
+              </div>
+              <div class="item-quantity-price">
+                <span class="item-qty">${item.quantity} x</span>
+                <span class="item-price">${(item.price * item.quantity).toFixed(2)} €</span>
+              </div>
             </div>
-            <div class="item-quantity-price">
-              <span class="item-qty">${item.quantity} x</span>
-              <span class="item-price">${(item.price * item.quantity).toFixed(2)} €</span>
-            </div>
-          </div>
-        `).join("")}
+          `;
+        }).join("")}
       </div>
 
       <div class="sidebar-cart-totals">
         <div class="total-row">
-          <span>Base Imponible (HT)</span>
+          <span>${this.app.t("cat_summary_subtotal", "Base Imponible (HT)")}</span>
           <span>${subtotal.toFixed(2)} €</span>
         </div>
         <div class="total-row">
-          <span>IVA (10%)</span>
+          <span>${this.app.t("cat_summary_vat", "IVA (10%)")}</span>
           <span>${vat.toFixed(2)} €</span>
         </div>
         <div class="total-row total-highlight">
-          <span>Total Facturado (TTC)</span>
+          <span>${this.app.t("cat_summary_total", "Total Facturado (TTC)")}</span>
           <span class="golden-text">${total.toFixed(2)} €</span>
         </div>
         <div class="delivery-notice">
-          Entrega logística refrigerada gratuita (Málaga/Marbella).
+          ${this.app.lang === "en" ? "Free refrigerated logistics delivery (Málaga/Marbella)." : "Entrega logística refrigerada gratuita (Málaga/Marbella)."}
         </div>
       </div>
 
       <button id="btn-go-checkout" class="btn-primary btn-block">
-        <span>Proceder al Pedido</span>
+        <span>${this.app.t("cat_summary_btn_checkout", "Proceder al Pedido")}</span>
         <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </button>
     `;
@@ -329,10 +335,8 @@ export default class Catalog {
   }
 
   handleQuantityInputChanged(id, value) {
-    // We update local styling changes if any
     const btn = document.querySelector(`.btn-update-cart[data-id="${id}"]`);
     if (btn) {
-      // Toggle button highlights to prompt user to update
       btn.classList.add("highlight-update");
     }
   }

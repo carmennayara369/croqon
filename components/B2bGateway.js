@@ -17,7 +17,7 @@ export default class B2bGateway {
           <!-- Back button to Public Vitrine -->
           <button id="btn-gateway-back-home" class="btn-gateway-back">
             <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-            <span>Volver a la vitrina pública</span>
+            <span>${this.app.t("gateway_btn_back_vitrine", "Volver a la vitrina pública")}</span>
           </button>
 
           <div class="gateway-brand">
@@ -25,20 +25,20 @@ export default class B2bGateway {
               <img src="assets/images/clean_logo.png" alt="Croqon" class="gateway-logo">
               <span class="gateway-logo-subtitle">PREMIUM CROQUETAS</span>
             </div>
-            <h2 class="serif-title golden-text" style="margin-top: 15px;">Acceso Profesional</h2>
-            <p class="subtitle">Canal exclusivo de suministro para hostelería de la Costa del Sol</p>
+            <h2 class="serif-title golden-text" style="margin-top: 15px;">${this.app.t("nav_pro_access", "Acceso Profesional")}</h2>
+            <p class="subtitle">${this.app.t("gateway_subtitle", "Canal exclusivo de suministro para hostelería de la Costa del Sol")}</p>
           </div>
 
           ${this.registrationSuccessPin ? this.renderRegistrationSuccess() : this.renderTabsAndForms()}
 
           <div id="gateway-loader" class="gateway-loader hide">
             <div class="spinner"></div>
-            <h3 class="serif-title golden-text">Verificando Datos Comerciales...</h3>
-            <p>Conectando con el registro mercantil y comprobando validez...</p>
+            <h3 class="serif-title golden-text">${this.app.lang === "en" ? "Verifying Trade Credentials..." : "Verificando Datos Comerciales..."}</h3>
+            <p>${this.app.lang === "en" ? "Connecting to the corporate registry and checking validity..." : "Conectando con el registro mercantil y comprobando validez..."}</p>
             <div class="loader-steps">
-              <div class="step step-1 active">✓ Conexión establecida</div>
-              <div class="step step-2">⚙ Comprobando credenciales en base de datos</div>
-              <div class="step step-3">⌛ Creando sesión profesional segura</div>
+              <div class="step step-1 active">✓ ${this.app.lang === "en" ? "Secure connection established" : "Conexión establecida"}</div>
+              <div class="step step-2">⚙ ${this.app.lang === "en" ? "Verifying credentials in database" : "Comprobando credenciales en base de datos"}</div>
+              <div class="step step-3">⌛ ${this.app.lang === "en" ? "Creating secure professional session" : "Creando sesión profesional segura"}</div>
             </div>
           </div>
         </div>
@@ -52,29 +52,29 @@ export default class B2bGateway {
     return `
       <!-- Tab Toggles -->
       <div class="gateway-tabs-header">
-        <button class="gateway-tab-btn ${this.activeTab === "login" ? "active" : ""}" data-tab="login">Acceso con PIN</button>
-        <button class="gateway-tab-btn ${this.activeTab === "register" ? "active" : ""}" data-tab="register">Registrar Establecimiento</button>
+        <button class="gateway-tab-btn ${this.activeTab === "login" ? "active" : ""}" data-tab="login">${this.app.t("gateway_tab_login", "Acceso con PIN")}</button>
+        <button class="gateway-tab-btn ${this.activeTab === "register" ? "active" : ""}" data-tab="register">${this.app.t("gateway_tab_register", "Registrar Establecimiento")}</button>
       </div>
 
       <!-- Tab 1: LOGIN (Acceso con PIN) -->
       <div class="gateway-tab-pane ${this.activeTab === "login" ? "" : "hide"}">
         <form id="gateway-login-form" class="gateway-form">
           <div class="form-group">
-            <label for="login-cif">CIF / NIF del Establecimiento *</label>
+            <label for="login-cif">${this.app.t("gateway_login_cif", "CIF / NIF del Establecimiento *")}</label>
             <input type="text" id="login-cif" required placeholder="Ej: B93848201">
           </div>
           <div class="form-group">
-            <label for="login-pin">Código PIN de Acceso *</label>
-            <input type="password" id="login-pin" required placeholder="Ingrese su PIN de 4 dígitos" pattern="^[0-9]{4}$" title="El PIN debe consistir de 4 dígitos">
-            <small class="form-hint">Tip de prueba: Ingrese CIF <strong>B93848201</strong> y PIN <strong>1234</strong></small>
+            <label for="login-pin">${this.app.t("gateway_login_pin", "Código PIN de Acceso *")}</label>
+            <input type="password" id="login-pin" required placeholder="${this.app.lang === "en" ? "Enter your 4-digit PIN" : "Ingrese su PIN de 4 dígitos"}" pattern="^[0-9]{4}$" title="${this.app.lang === "en" ? "PIN must be 4 digits" : "El PIN debe consistir de 4 dígitos"}">
+            <small class="form-hint">${this.app.t("gateway_login_hint", "Tip de prueba: Ingrese CIF <strong>B93848201</strong> y PIN <strong>1234</strong>")}</small>
           </div>
           
           <div id="login-error-msg" class="hide" style="color: var(--color-error); font-size: 13px; margin-bottom: 15px; text-align: center; font-weight: 500;">
-            ❌ CIF o PIN incorrectos. Si no recuerda su PIN, contacte con Administración.
+            ${this.app.t("gateway_login_err", "❌ CIF o PIN incorrectos. Si no recuerda su PIN, contacte con Administración.")}
           </div>
 
           <button type="submit" class="btn-primary btn-block">
-            <span>Verificar e Ingresar</span>
+            <span>${this.app.t("gateway_btn_login", "Verificar e Ingresar")}</span>
             <svg class="icon-arrow" viewBox="0 0 24 24" width="18" height="18"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
         </form>
@@ -85,54 +85,54 @@ export default class B2bGateway {
         <form id="gateway-register-form" class="gateway-form">
           <div class="form-row">
             <div class="form-group">
-              <label for="company-name">Razón Social *</label>
+              <label for="company-name">${this.app.t("gateway_reg_company", "Razón Social *")}</label>
               <input type="text" id="company-name" required placeholder="Ej: Restaurante Miramar S.L." autocomplete="organization">
             </div>
             <div class="form-group">
-              <label for="cif-nif">CIF / NIF / SIRET *</label>
-              <input type="text" id="cif-nif" required placeholder="Ej: B98765432" pattern="^[a-zA-Z0-9-]{8,15}$" title="Introduzca un CIF/NIF válido (8-15 caracteres)">
+              <label for="cif-nif">${this.app.t("gateway_reg_cif", "CIF / NIF / SIRET *")}</label>
+              <input type="text" id="cif-nif" required placeholder="Ej: B98765432" pattern="^[a-zA-Z0-9-]{8,15}$" title="${this.app.lang === "en" ? "Please enter a valid CIF/NIF (8-15 characters)" : "Introduzca un CIF/NIF válido (8-15 caracteres)"}">
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group">
-              <label for="contact-name">Nombre del Comprador / Chef *</label>
+              <label for="contact-name">${this.app.t("gateway_reg_contact", "Nombre del Comprador / Chef *")}</label>
               <input type="text" id="contact-name" required placeholder="Ej: Chef María Ortiz">
             </div>
             <div class="form-group">
-              <label for="contact-phone">Teléfono de Contacto *</label>
+              <label for="contact-phone">${this.app.t("gateway_reg_phone", "Teléfono de Contacto *")}</label>
               <input type="tel" id="contact-phone" required placeholder="Ej: +34 600 123 456" autocomplete="tel">
             </div>
           </div>
 
           <div class="form-group">
-            <label for="contact-email">Email Profesional *</label>
+            <label for="contact-email">${this.app.t("gateway_reg_email", "Email Profesional *")}</label>
             <input type="email" id="contact-email" required placeholder="Ej: compras@miramarmarbella.com" autocomplete="email">
-            <small class="form-hint">Las facturas y confirmaciones de entrega se enviarán a este correo.</small>
+            <small class="form-hint">${this.app.t("gateway_reg_email_hint", "Las facturas y confirmaciones de entrega se enviarán a este correo.")}</small>
           </div>
 
           <div class="form-group">
-            <label for="company-sector">Sector de Hostelería</label>
+            <label for="company-sector">${this.app.t("gateway_reg_sector", "Sector de Hostelería")}</label>
             <select id="company-sector">
-              <option value="restaurante">Restaurante / Gastrobar</option>
-              <option value="hotel">Hotel / Catering</option>
-              <option value="beach-club">Beach Club / Chiringuito</option>
-              <option value="distribuidor">Distribuidor Gourmet</option>
+              <option value="restaurante">${this.app.t("gateway_reg_sector_rest", "Restaurante / Gastrobar")}</option>
+              <option value="hotel">${this.app.t("gateway_reg_sector_hotel", "Hotel / Catering")}</option>
+              <option value="beach-club">${this.app.t("gateway_reg_sector_beach", "Beach Club / Chiringuito")}</option>
+              <option value="distribuidor">${this.app.t("gateway_reg_sector_dist", "Distribuidor Gourmet")}</option>
             </select>
           </div>
 
           <div class="form-terms">
             <input type="checkbox" id="terms-agree" required checked>
-            <label for="terms-agree">Declaro que actúo como profesional y acepto las condiciones de suministro comercial.</label>
+            <label for="terms-agree">${this.app.t("gateway_reg_terms", "Declaro que actúo como profesional y acepto las condiciones de suministro comercial.")}</label>
           </div>
 
           <button type="submit" class="btn-primary btn-block">
-            <span>Registrar y Obtener PIN</span>
+            <span>${this.app.t("gateway_reg_btn", "Registrar y Obtener PIN")}</span>
             <svg class="icon-arrow" viewBox="0 0 24 24" width="18" height="18"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
           
           <button type="button" class="btn-secondary btn-block" id="btn-demo-fill" style="margin-top: 12px;">
-            <span>Rellenar con datos de prueba</span>
+            <span>${this.app.t("gateway_btn_demo", "Rellenar con datos de prueba")}</span>
           </button>
         </form>
       </div>
@@ -144,18 +144,18 @@ export default class B2bGateway {
       <div class="gateway-registration-success-card fade-in">
         <div style="background-color: rgba(46, 204, 113, 0.1); border: 1px solid rgba(46, 204, 113, 0.2); padding: 25px; border-radius: 4px; text-align: center; margin-bottom: 25px;">
           <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#2ecc71" stroke-width="2" style="margin-bottom: 15px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-          <h3 class="serif-title" style="color: #2ecc71; font-size: 20px; margin-bottom: 8px;">¡Establecimiento Registrado!</h3>
-          <p style="font-size: 13px; color: var(--color-text-muted);">Su cuenta B2B ha sido configurada. Guarde su código de acceso rápido (PIN) para próximos pedidos:</p>
+          <h3 class="serif-title" style="color: #2ecc71; font-size: 20px; margin-bottom: 8px;">${this.app.t("gateway_success_title", "¡Establecimiento Registrado!")}</h3>
+          <p style="font-size: 13px; color: var(--color-text-muted);">${this.app.t("gateway_success_desc", "Su cuenta B2B ha sido configurada. Guarde su código de acceso rápido (PIN) para próximos pedidos:")}</p>
           
           <div style="background-color: #111; color: var(--color-gold); font-size: 36px; font-weight: 700; letter-spacing: 6px; padding: 15px; border-radius: 4px; margin: 20px 0; border: 1px dashed var(--color-gold);">
             ${this.registrationSuccessPin}
           </div>
           
-          <p style="font-size: 11px; color: var(--color-gold-light);">Este código PIN puede ser regenerado en cualquier momento por el Administrador si se pierde.</p>
+          <p style="font-size: 11px; color: var(--color-gold-light);">${this.app.t("gateway_success_hint", "Este código PIN puede ser regenerado en cualquier momento por el Administrador si se pierde.")}</p>
         </div>
 
         <button id="btn-gateway-success-continue" class="btn-primary btn-block">
-          <span>Ingresar al Catálogo Pro</span>
+          <span>${this.app.t("gateway_success_btn", "Ingresar al Catálogo Pro")}</span>
         </button>
       </div>
     `;

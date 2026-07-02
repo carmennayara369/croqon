@@ -12,10 +12,10 @@ export default class Checkout {
     if (this.app.cart.items.length === 0) {
       container.innerHTML = `
         <div class="empty-state-checkout fade-in">
-          <h2 class="serif-title golden-text">Su carrito está vacío</h2>
-          <p>No puede proceder al checkout sin añadir cajas de croquetas a su pedido.</p>
+          <h2 class="serif-title golden-text">${this.app.t("chk_empty_title", "Su carrito está vacío")}</h2>
+          <p>${this.app.t("chk_empty_desc", "No puede proceder al checkout sin añadir cajas de croquetas a su pedido.")}</p>
           <button id="btn-back-catalog" class="btn-primary" style="margin-top: 20px;">
-            <span>Volver al Catálogo</span>
+            <span>${this.app.t("chk_empty_btn", "Volver al Catálogo")}</span>
           </button>
         </div>
       `;
@@ -35,9 +35,9 @@ export default class Checkout {
         <header class="checkout-header">
           <button id="btn-back-catalog-link" class="btn-back">
             <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-            <span>Volver al catálogo</span>
+            <span>${this.app.t("chk_back_link", "Volver al catálogo")}</span>
           </button>
-          <h1 class="serif-title golden-text">Finalizar Pedido Profesional</h1>
+          <h1 class="serif-title golden-text">${this.app.t("chk_header_title", "Finalizar Pedido Profesional")}</h1>
         </header>
 
         <div class="checkout-grid">
@@ -45,15 +45,15 @@ export default class Checkout {
           <form id="checkout-form" class="checkout-form-container">
             <!-- Section 1: Delivery Schedule -->
             <section class="checkout-section">
-              <h3 class="serif-title golden-text section-title">1. Dirección de Entrega y Programación</h3>
+              <h3 class="serif-title golden-text section-title">${this.app.t("chk_section_1", "1. Dirección de Entrega y Programación")}</h3>
               
               <div class="form-row">
                 <div class="form-group flex-2">
-                  <label for="shipping-address">Dirección del Establecimiento *</label>
+                  <label for="shipping-address">${this.app.t("chk_label_address", "Dirección del Establecimiento *")}</label>
                   <input type="text" id="shipping-address" required placeholder="Ej: Avenida Bulevar Príncipe Alfonso de Hohenlohe, S/N">
                 </div>
                 <div class="form-group">
-                  <label for="shipping-city">Localidad (Costa del Sol) *</label>
+                  <label for="shipping-city">${this.app.t("chk_label_city", "Localidad (Costa del Sol) *")}</label>
                   <select id="shipping-city" required>
                     <option value="marbella">Marbella</option>
                     <option value="malaga">Málaga Centro</option>
@@ -67,16 +67,16 @@ export default class Checkout {
 
               <div class="form-row">
                 <div class="form-group">
-                  <label for="shipping-postal">Código Postal *</label>
-                  <input type="text" id="shipping-postal" required placeholder="Ej: 29602" pattern="^[0-9]{5}$" title="Introduzca un código postal válido de 5 dígitos">
+                  <label for="shipping-postal">${this.app.t("chk_label_postal", "Código Postal *")}</label>
+                  <input type="text" id="shipping-postal" required placeholder="Ej: 29602" pattern="^[0-9]{5}$" title="${this.app.lang === "en" ? "Please enter a valid 5-digit postal code" : "Introduzca un código postal válido de 5 dígitos"}">
                 </div>
                 <div class="form-group flex-2">
-                  <label for="delivery-date">Fecha de Entrega Programada *</label>
+                  <label for="delivery-date">${this.app.t("chk_label_date", "Fecha de Entrega Programada *")}</label>
                   <select id="delivery-date" required>
-                    <option value="${nextDays[0].iso}">${nextDays[0].formatted} (Logística Martes)</option>
-                    <option value="${nextDays[1].iso}">${nextDays[1].formatted} (Logística Viernes)</option>
+                    <option value="${nextDays[0].iso}">${nextDays[0].formatted} (${this.app.lang === "en" ? "Tuesday Delivery" : "Logística Martes"})</option>
+                    <option value="${nextDays[1].iso}">${nextDays[1].formatted} (${this.app.lang === "en" ? "Friday Delivery" : "Logística Viernes"})</option>
                   </select>
-                  <small class="form-hint">Entregas mediante transporte refrigerado certificado de 8:00 a 14:00.</small>
+                  <small class="form-hint">${this.app.t("chk_delivery_hint", "Entregas mediante transporte refrigerado certificado de 8:00 a 14:00.")}</small>
                 </div>
               </div>
             </section>
@@ -84,25 +84,25 @@ export default class Checkout {
             <!-- Section 2: Billing Info -->
             <section class="checkout-section">
               <div class="section-title-row">
-                <h3 class="serif-title golden-text section-title">2. Datos de Facturación</h3>
+                <h3 class="serif-title golden-text section-title">${this.app.t("chk_billing_same", "2. Datos de Facturación")}</h3>
                 <div class="billing-same-wrap">
                   <input type="checkbox" id="billing-same" checked>
-                  <label for="billing-same">Mismos datos de envío</label>
+                  <label for="billing-same">${this.app.lang === "en" ? "Same as shipping details" : "Mismos datos de envío"}</label>
                 </div>
               </div>
 
               <div id="billing-fields" class="hide">
                 <div class="form-group">
-                  <label for="billing-company">Nombre / Razón Social de Facturación *</label>
+                  <label for="billing-company">${this.app.t("chk_billing_company", "Nombre / Razón Social de Facturación *")}</label>
                   <input type="text" id="billing-company" placeholder="Ej: La Marea Marbella S.L.">
                 </div>
                 <div class="form-row">
                   <div class="form-group flex-2">
-                    <label for="billing-address">Dirección de Facturación *</label>
+                    <label for="billing-address">${this.app.t("chk_billing_address", "Dirección de Facturación *")}</label>
                     <input type="text" id="billing-address" placeholder="Ej: Calle Principal 12, Local 4">
                   </div>
                   <div class="form-group">
-                    <label for="billing-cif">CIF / NIF Facturación *</label>
+                    <label for="billing-cif">${this.app.t("chk_billing_cif", "CIF / NIF Facturación *")}</label>
                     <input type="text" id="billing-cif" placeholder="Ej: B93848201">
                   </div>
                 </div>
@@ -111,21 +111,21 @@ export default class Checkout {
 
             <!-- Section 3: Payment Method -->
             <section class="checkout-section">
-              <h3 class="serif-title golden-text section-title">3. Forma de Pago Seguro</h3>
+              <h3 class="serif-title golden-text section-title">${this.app.t("chk_section_3", "3. Forma de Pago Seguro")}</h3>
               
               <div class="payment-selector">
                 <label class="payment-option active">
                   <input type="radio" name="payment-method" value="stripe" checked>
                   <div class="payment-option-content">
-                    <span class="payment-name">Tarjeta de Crédito (Stripe)</span>
-                    <span class="payment-desc">Procesamiento inmediato, ideal para asegurar el cupo de entrega.</span>
+                    <span class="payment-name">${this.app.t("chk_pay_stripe", "Tarjeta de Crédito (Stripe)")}</span>
+                    <span class="payment-desc">${this.app.t("chk_pay_stripe_desc", "Procesamiento inmediato, ideal para asegurar el cupo de entrega.")}</span>
                   </div>
                 </label>
                 <label class="payment-option">
                   <input type="radio" name="payment-method" value="transfer">
                   <div class="payment-option-content">
-                    <span class="payment-name">Transferencia Bancaria Directa</span>
-                    <span class="payment-desc">Se requiere el envío del justificante de pago antes de la carga logística.</span>
+                    <span class="payment-name">${this.app.t("chk_pay_transfer", "Transferencia Bancaria Directa")}</span>
+                    <span class="payment-desc">${this.app.t("chk_pay_transfer_desc", "Se requiere el envío del justificante de pago antes de la carga logística.")}</span>
                   </div>
                 </label>
               </div>
@@ -133,7 +133,7 @@ export default class Checkout {
               <!-- Stripe Elements Card Mock -->
               <div id="stripe-card-wrapper" class="stripe-card-wrapper">
                 <div class="stripe-elements-header">
-                  <span>Información de la Tarjeta</span>
+                  <span>${this.app.t("chk_stripe_header", "Información de la Tarjeta")}</span>
                   <div class="stripe-badges">
                     <span class="stripe-badge">Visa</span>
                     <span class="stripe-badge">Mastercard</span>
@@ -151,28 +151,28 @@ export default class Checkout {
                   </div>
                 </div>
                 <div class="stripe-holder-input">
-                  <input type="text" id="card-holder" required placeholder="Nombre del Titular de la Tarjeta">
+                  <input type="text" id="card-holder" required placeholder="${this.app.t("chk_stripe_holder", "Nombre del Titular de la Tarjeta")}">
                 </div>
                 <div class="stripe-security-notice">
-                  Sus datos se encriptan mediante SSL y son procesados directamente por la infraestructura segura de Stripe.
+                  ${this.app.t("chk_stripe_security", "Sus datos se encriptan mediante SSL y son procesados directamente por la infraestructura segura de Stripe.")}
                 </div>
               </div>
 
               <!-- Bank Transfer Details (Hidden by default) -->
               <div id="bank-transfer-details" class="bank-transfer-details hide">
-                <p>Realice la transferencia bancaria utilizando los siguientes detalles:</p>
+                <p>${this.app.t("chk_transfer_intro", "Realice la transferencia bancaria utilizando los siguientes detalles:")}</p>
                 <div class="bank-info-box">
-                  <div class="bank-row"><span>Banco:</span><strong>Banco Santander</strong></div>
-                  <div class="bank-row"><span>Beneficiario:</span><strong>CROQON PREMIUM CROQUETAS S.L.</strong></div>
+                  <div class="bank-row"><span>${this.app.t("chk_transfer_bank", "Banco:")}</span><strong>Banco Santander</strong></div>
+                  <div class="bank-row"><span>${this.app.t("chk_transfer_beneficiary", "Beneficiario:")}</span><strong>CROQON PREMIUM CROQUETAS S.L.</strong></div>
                   <div class="bank-row"><span>IBAN:</span><strong>ES21 0049 1500 2312 3456 7890</strong></div>
-                  <div class="bank-row"><span>Concepto:</span><strong>PEDIDO PRO - <span id="mock-concept-id">...</span></strong></div>
+                  <div class="bank-row"><span>${this.app.t("chk_transfer_concept", "Concepto:")}</span><strong>PEDIDO PRO - <span id="mock-concept-id">...</span></strong></div>
                 </div>
-                <p class="warning-text">Importante: El pedido no será cargado en el transporte refrigerado hasta que recibamos el justificante bancario en logistica@croqon.com.</p>
+                <p class="warning-text">${this.app.t("chk_transfer_warning", "Importante: El pedido no será cargado en el transporte refrigerado hasta que recibamos el justificante bancario en logistica@croqon.com.")}</p>
               </div>
             </section>
 
             <button type="submit" class="btn-primary btn-block btn-large" id="btn-submit-order" style="margin-top: 30px;">
-              <span>Confirmar Pedido y Pagar (${total.toFixed(2)} € TTC)</span>
+              <span>${this.app.lang === "en" ? `Confirm Order & Pay (${total.toFixed(2)} € TTC)` : `Confirmar Pedido y Pagar (${total.toFixed(2)} € TTC)`}</span>
               <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </button>
           </form>
@@ -180,35 +180,38 @@ export default class Checkout {
           <!-- Order Summary Sticky Panel (Right) -->
           <aside class="checkout-summary-sidebar">
             <div class="sticky-sidebar">
-              <h3 class="serif-title golden-text sidebar-title">Resumen de Compra</h3>
+              <h3 class="serif-title golden-text sidebar-title">${this.app.t("chk_summary_title", "Resumen de Compra")}</h3>
               
               <div class="checkout-summary-items">
-                ${this.app.cart.items.map(item => `
-                  <div class="checkout-summary-item">
-                    <span class="item-qty-name"><strong>${item.quantity}</strong> x ${item.name}</span>
-                    <span class="item-total-price">${(item.price * item.quantity).toFixed(2)} €</span>
-                  </div>
-                `).join("")}
+                ${this.app.cart.items.map(item => {
+                  const name = this.app.lang === "en" && item.name_en ? item.name_en : item.name;
+                  return `
+                    <div class="checkout-summary-item">
+                      <span class="item-qty-name"><strong>${item.quantity}</strong> x ${name}</span>
+                      <span class="item-total-price">${(item.price * item.quantity).toFixed(2)} €</span>
+                    </div>
+                  `;
+                }).join("")}
               </div>
 
               <div class="checkout-summary-totals">
                 <div class="total-row">
-                  <span>Base Imponible (HT)</span>
+                  <span>${this.app.t("cat_summary_subtotal", "Base Imponible (HT)")}</span>
                   <span>${subtotal.toFixed(2)} €</span>
                 </div>
                 <div class="total-row">
-                  <span>TVA / IVA (10%)</span>
+                  <span>${this.app.t("cat_summary_vat", "IVA (10%)")}</span>
                   <span>${vat.toFixed(2)} €</span>
                 </div>
                 <div class="total-row total-highlight">
-                  <span>Total Neto (TTC)</span>
+                  <span>${this.app.t("cat_summary_total", "Total Facturado (TTC)")}</span>
                   <span class="golden-text">${total.toFixed(2)} €</span>
                 </div>
               </div>
 
               <div class="checkout-help-card">
-                <h4>Asistencia Logística</h4>
-                <p>¿Tiene alguna solicitud especial de entrega o dudas con su pedido B2B?</p>
+                <h4>${this.app.t("chk_help_title", "Asistencia Logística")}</h4>
+                <p>${this.app.t("chk_help_desc", "¿Tiene alguna solicitud especial de entrega o dudas con su pedido B2B?")}</p>
                 <p>Llámenos: <strong>+34 951 123 456</strong></p>
                 <p>Email: <strong>pedidos@croqon.com</strong></p>
               </div>
@@ -220,12 +223,12 @@ export default class Checkout {
         <div id="payment-overlay" class="modal hide">
           <div class="modal-content payment-processing-card">
             <div class="spinner"></div>
-            <h3 class="serif-title golden-text" id="overlay-title">Procesando Transacción Comercial...</h3>
-            <p id="overlay-desc">Conectando con los servidores seguros de Stripe para validar la operación...</p>
+            <h3 class="serif-title golden-text" id="overlay-title">${this.app.t("chk_overlay_title", "Procesando Transacción Comercial...")}</h3>
+            <p id="overlay-desc">${this.app.t("chk_overlay_desc", "Conectando con los servidores seguros de Stripe para validar la operación...")}</p>
             <div class="payment-status-steps">
-              <div class="p-step active" id="p-step-1">✓ Autorizando transacción comercial</div>
-              <div class="p-step" id="p-step-2">⚙ Creando factura oficial B2B</div>
-              <div class="p-step" id="p-step-3">⌛ Confirmando reserva de entrega refrigerada</div>
+              <div class="p-step active" id="p-step-1">✓ ${this.app.t("chk_overlay_step_1", "Autorizando transacción comercial")}</div>
+              <div class="p-step" id="p-step-2">⚙ ${this.app.t("chk_overlay_step_2", "Creando factura oficial B2B")}</div>
+              <div class="p-step" id="p-step-3">⌛ ${this.app.t("chk_overlay_step_3", "Confirmando reserva de entrega refrigerada")}</div>
             </div>
           </div>
         </div>
@@ -247,8 +250,8 @@ export default class Checkout {
   getNextDeliveryDays() {
     const days = [];
     const date = new Date();
+    const isEn = this.app.lang === "en";
     
-    // Simple logic to find next Tuesday (day 2) and next Friday (day 5)
     for (let i = 1; i <= 14; i++) {
       const nextDate = new Date();
       nextDate.setDate(date.getDate() + i);
@@ -257,12 +260,16 @@ export default class Checkout {
       if (dayOfWeek === 2) {
         days.push({
           iso: nextDate.toISOString().split("T")[0],
-          formatted: `Martes, ${nextDate.toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" })}`
+          formatted: isEn 
+            ? `Tuesday, ${nextDate.toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" })}`
+            : `Martes, ${nextDate.toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" })}`
         });
       } else if (dayOfWeek === 5) {
         days.push({
           iso: nextDate.toISOString().split("T")[0],
-          formatted: `Viernes, ${nextDate.toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" })}`
+          formatted: isEn 
+            ? `Friday, ${nextDate.toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" })}`
+            : `Viernes, ${nextDate.toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" })}`
         });
       }
 
@@ -321,12 +328,20 @@ export default class Checkout {
           stripeWrapper.classList.remove("hide");
           bankDetails.classList.add("hide");
           this.toggleStripeFieldsRequired(true);
-          if (submitBtnSpan) submitBtnSpan.innerText = `Confirmar Pedido y Pagar (${total.toFixed(2)} € TTC)`;
+          if (submitBtnSpan) {
+            submitBtnSpan.innerText = this.app.lang === "en" 
+              ? `Confirm Order & Pay (${total.toFixed(2)} € TTC)`
+              : `Confirmar Pedido y Pagar (${total.toFixed(2)} € TTC)`;
+          }
         } else {
           stripeWrapper.classList.add("hide");
           bankDetails.classList.remove("hide");
           this.toggleStripeFieldsRequired(false);
-          if (submitBtnSpan) submitBtnSpan.innerText = `Reservar Pedido - Pago por Transferencia (${total.toFixed(2)} € TTC)`;
+          if (submitBtnSpan) {
+            submitBtnSpan.innerText = this.app.lang === "en"
+              ? `Reserve Order - Pay by Bank Transfer (${total.toFixed(2)} € TTC)`
+              : `Reservar Pedido - Pago por Transferencia (${total.toFixed(2)} € TTC)`;
+          }
         }
       });
     });
@@ -436,23 +451,23 @@ export default class Checkout {
 
     if (paymentMethod === "transfer") {
       if (step1) {
-        step1.innerText = "✓ Registro de pedido B2B reservado";
+        step1.innerText = this.app.lang === "en" ? "✓ B2B Order Reservation Logged" : "✓ Registro de pedido B2B reservado";
         step1.classList.add("active");
       }
-      if (title) title.innerText = "Creando Reserva Logística...";
-      if (desc) desc.innerText = "Preparando cuenta de transferencia y albarán de compra...";
+      if (title) title.innerText = this.app.lang === "en" ? "Creating Logistics Booking..." : "Creando Reserva Logística...";
+      if (desc) desc.innerText = this.app.lang === "en" ? "Preparing bank details and proforma slip..." : "Preparando cuenta de transferencia y albarán de compra...";
     }
 
     // Step 2
     setTimeout(() => {
       if (step2) step2.classList.add("active");
-      if (desc) desc.innerText = "Generando factura proforma en formato PDF...";
+      if (desc) desc.innerText = this.app.lang === "en" ? "Generating proforma invoice PDF document..." : "Generando factura proforma en formato PDF...";
     }, 700);
 
     // Step 3
     setTimeout(() => {
       if (step3) step3.classList.add("active");
-      if (desc) desc.innerText = "Asignando cupo de transporte refrigerado para Málaga - Costa del Sol...";
+      if (desc) desc.innerText = this.app.lang === "en" ? "Assigning cold-truck space for Málaga - Costa del Sol..." : "Asignando cupo de transporte refrigerado para Málaga - Costa del Sol...";
     }, 1400);
 
     // Success and routing
@@ -464,7 +479,7 @@ export default class Checkout {
       
       const order = {
         orderId: orderId,
-        date: new Date().toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }),
+        date: new Date().toLocaleDateString(this.app.lang === "en" ? "en-US" : "es-ES", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }),
         user: this.app.user,
         delivery: {
           address: document.getElementById("shipping-address").value,
@@ -493,7 +508,7 @@ export default class Checkout {
       // Save to application order history / session order
       this.app.lastOrder = order;
 
-      // Save to B2B orders list database in localStorage
+      // Save to B2B orders list database in localStorage & Server
       try {
         const stored = localStorage.getItem("croqon_b2b_orders");
         const orders = stored ? JSON.parse(stored) : [];
@@ -502,8 +517,15 @@ export default class Checkout {
         order.payment.status = paymentMethod === "stripe" ? "paid" : "pending";
         orders.push(order);
         localStorage.setItem("croqon_b2b_orders", JSON.stringify(orders));
+
+        // Push to Plesk PHP shared database file
+        fetch("api.php?action=save_orders", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(orders)
+        }).catch(err => console.error("Failed to push orders to server", err));
       } catch (e) {
-        console.error("Failed to append order to local storage database", e);
+        console.error("Failed to append order to storage database", e);
       }
       
       // Clear cart

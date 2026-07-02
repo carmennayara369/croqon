@@ -8,6 +8,7 @@ import OrderSuccess from "./components/OrderSuccess.js";
 import AdminDashboard from "./components/AdminDashboard.js";
 
 import { products as defaultProducts } from "./data/products.js";
+import { translations } from "./data/translations.js";
 
 class App {
   constructor() {
@@ -15,6 +16,7 @@ class App {
     this.cart = new CartState();
     this.lastOrder = null;
     this.currentRoute = "home";
+    this.lang = localStorage.getItem("croqon_lang") || "es";
     
     // Seed databases
     this.getProducts();
@@ -129,6 +131,36 @@ class App {
     }
   }
 
+  t(key, defaultText = "") {
+    if (this.lang === "es") return defaultText;
+    if (translations[this.lang] && translations[this.lang][key] !== undefined) {
+      return translations[this.lang][key];
+    }
+    return defaultText;
+  }
+
+  setLanguage(lang) {
+    this.lang = lang;
+    localStorage.setItem("croqon_lang", lang);
+    this.updateLangButtons();
+    
+    // Re-render the header nav (since nav links are translated)
+    this.updateHeaderContent();
+    
+    // Re-render the active route view to display translated content
+    this.renderRoute();
+  }
+
+  updateLangButtons() {
+    document.querySelectorAll(".lang-btn").forEach(btn => {
+      if (btn.dataset.lang === this.lang) {
+        btn.classList.add("active");
+      } else {
+        btn.classList.remove("active");
+      }
+    });
+  }
+
   loadUserSession() {
     try {
       const stored = localStorage.getItem("croqon_b2b_user");
@@ -168,6 +200,17 @@ class App {
       }
     };
     initRoute();
+
+    // Initialize language switcher active states
+    this.updateLangButtons();
+
+    // Bind language switcher clicks
+    document.querySelectorAll(".lang-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const selectedLang = e.currentTarget.dataset.lang;
+        this.setLanguage(selectedLang);
+      });
+    });
 
     // Set initial header layout and badge
     this.updateHeaderContent();
@@ -252,7 +295,7 @@ class App {
     if (this.user) {
       // B2B Logged-In Mode
       navContent.innerHTML = `
-        <span class="nav-b2b-badge">Canal Profesional (HORECA)</span>
+        <span class="nav-b2b-badge">${this.t("nav_pro_channel", "Canal Profesional (HORECA)")}</span>
       `;
       actionsContent.innerHTML = `
         <div class="header-user-status">
@@ -283,11 +326,11 @@ class App {
     } else {
       // Public Visitor Mode
       navContent.innerHTML = `
-        <a href="#collection-target" class="nav-link" id="nav-link-collection">Nuestra Colección</a>
-        <a href="#logistics-coverage" class="nav-link" id="nav-link-logistics">Logística y Reparto</a>
+        <a href="#collection-target" class="nav-link" id="nav-link-collection">${this.t("nav_collection", "Nuestra Colección")}</a>
+        <a href="#logistics-coverage" class="nav-link" id="nav-link-logistics">${this.t("nav_logistics", "Logística y Reparto")}</a>
       `;
       actionsContent.innerHTML = `
-        <button class="btn-primary btn-small" id="nav-btn-gateway">Acceso Profesional</button>
+        <button class="btn-primary btn-small" id="nav-btn-gateway">${this.t("nav_pro_access", "Acceso Profesional")}</button>
       `;
 
       // Attach public clicks

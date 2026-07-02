@@ -3429,4 +3429,43 @@ textarea:focus {
   }
 }
 
+/* Language switcher styling */
+.lang-switcher {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+}
+
+.lang-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 2px 6px;
+  transition: var(--transition-fast);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+}
+
+.lang-btn:hover {
+  color: var(--color-gold);
+}
+
+.lang-btn.active {
+  color: var(--color-gold);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.lang-separator {
+  color: var(--color-border-dark);
+  user-select: none;
+}
+
+
 

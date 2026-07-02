@@ -1,78 +1,98 @@
-// Product database for Croqon B2B Portal
+// Product database for Croqon B2B Portal (with Spanish and English translations)
 export const products = [
   {
     id: "manchego-semicurado",
     name: "Manchego Semicurado",
+    name_en: "Semi-cured Manchego",
     description: "Cremosas y delicadas, elaboradas con queso Manchego semicurado.",
+    description_en: "Creamy and delicate, prepared with authentic semi-cured Manchego cheese.",
     price: 75.00, // Price in EUR per box of 150 units
     units: 150,
     weight: 30,
     icon: "cheese",
-    flavorProfile: "Cheese / Cremoso",
+    flavorProfile: "Queso / Cremoso",
+    flavorProfile_en: "Cheese / Creamy",
     ingredients: "Leche entera, queso Manchego semicurado (12%), harina de trigo, mantequilla, pan rallado, huevo, sal, gelatina.",
     allergens: ["Gluten", "Lácteos", "Huevo"],
     imageType: "grid",
     imageClass: "img-manchego-semi",
-    badge: "Receta Cremosa"
+    badge: "Receta Cremosa",
+    badge_en: "Creamy Recipe"
   },
   {
     id: "chorizo-iberico",
     name: "Chorizo Ibérico de Bellota",
+    name_en: "Acorn-fed Iberian Chorizo",
     description: "Sabor intenso y ligeramente picante, con auténtico chorizo ibérico de bellota.",
+    description_en: "Intense and slightly spicy flavor, with authentic acorn-fed Iberian chorizo.",
     price: 82.50,
     units: 150,
     weight: 30,
     icon: "sausage",
     flavorProfile: "Ibérico / Picante",
+    flavorProfile_en: "Iberian / Spicy",
     ingredients: "Leche entera, chorizo ibérico de bellota (15%), harina de trigo, mantequilla, cebolla, pan rallado, huevo, especias, sal.",
     allergens: ["Gluten", "Lácteos", "Huevo"],
     imageType: "grid",
     imageClass: "img-chorizo",
-    badge: "Sabor Intenso"
+    badge: "Sabor Intenso",
+    badge_en: "Intense Flavor"
   },
   {
     id: "manchego-serrano",
     name: "Manchego y Serrano",
+    name_en: "Manchego & Serrano Ham",
     description: "La combinación perfecta entre queso Manchego semicurado y jamón Serrano.",
+    description_en: "The perfect combination between semi-cured Manchego cheese and premium Serrano ham.",
     price: 78.00,
     units: 150,
     weight: 30,
     icon: "ham-cheese",
     flavorProfile: "Mixto / Tradicional",
+    flavorProfile_en: "Mixed / Traditional",
     ingredients: "Leche entera, queso Manchego semicurado (8%), jamón serrano (8%), harina de trigo, mantequilla, pan rallado, huevo, sal.",
     allergens: ["Gluten", "Lácteos", "Huevo"],
     imageType: "grid",
     imageClass: "img-manchego-serrano",
-    badge: "Equilibrio Perfecto"
+    badge: "Equilibrio Perfecto",
+    badge_en: "Perfect Balance"
   },
   {
     id: "jamon-iberico",
     name: "Jamón Ibérico de Bellota",
+    name_en: "Acorn-fed Iberian Ham",
     description: "Elaboradas con jamón ibérico de bellota, para un sabor profundo e inigualable.",
+    description_en: "Made with acorn-fed Iberian ham, for a deep and matchless gastronomic flavor.",
     price: 90.00,
     units: 150,
     weight: 30,
     icon: "ham",
     flavorProfile: "Ibérico / Premium",
+    flavorProfile_en: "Iberian / Premium",
     ingredients: "Leche entera, jamón ibérico de bellota (18%), harina de trigo, mantequilla de Soria, caldo de jamón, pan rallado, huevo, sal.",
     allergens: ["Gluten", "Lácteos", "Huevo"],
     imageType: "grid",
     imageClass: "img-jamon-iberico",
-    badge: "Joyas Gastronómicas"
+    badge: "Joyas Gastronómicas",
+    badge_en: "Gastronomic Jewel"
   },
   {
     id: "jamon-serrano-gr",
     name: "Jamón Serrano Gran Reserva",
+    name_en: "Gran Reserva Serrano Ham",
     description: "Cremosa bechamel elaborada con leche entera y mantequilla, combinada con jamón serrano Gran Reserva (17%). Sabor intenso y tradicional, con textura crujiente por fuera y cremosa por dentro.",
+    description_en: "Creamy bechamel made with whole milk and butter, combined with Gran Reserva Serrano ham (17%). Intense and traditional flavor.",
     price: 85.00,
     units: 150,
     weight: 30,
     icon: "chef",
     flavorProfile: "Tradicional / Gran Reserva",
+    flavorProfile_en: "Traditional / Gran Reserva",
     ingredients: "Leche entera, jamón serrano Gran Reserva (17%) (jamón de cerdo, sal, conservadores E-252, E-250), harina de trigo, queso manchego semicurado (9%), mantequilla (leche), pan rallado, huevo entero líquido, caldo de pollo (contiene apio), sal.",
     allergens: ["Gluten", "Lácteos", "Huevo", "Apio"],
     imageType: "sheet",
     imageClass: "img-jamon-serrano-gr",
-    badge: "Calidad Excepcional"
+    badge: "Calidad Excepcional",
+    badge_en: "Exceptional Quality"
   }
 ];
