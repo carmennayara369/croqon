@@ -33,8 +33,9 @@ export const products = [
     flavorProfile_en: "Iberian / Spicy",
     ingredients: "Leche entera, chorizo ibérico de bellota (15%), harina de trigo, mantequilla, cebolla, pan rallado, huevo, especias, sal.",
     allergens: ["Gluten", "Lácteos", "Huevo"],
-    imageType: "grid",
+    imageType: "file",
     imageClass: "img-chorizo",
+    imagePath: "assets/images/product_chorizo_iberico.jpg",
     badge: "Sabor Intenso",
     badge_en: "Intense Flavor"
   },
