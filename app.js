@@ -67,6 +67,15 @@ class App {
         manchegoSemi.imageType = "file";
         modified = true;
       }
+
+      // Add missing default products if not present in the active database
+      defaultProducts.forEach(defaultP => {
+        if (!products.some(p => p.id === defaultP.id)) {
+          products.push(defaultP);
+          modified = true;
+        }
+      });
+
       if (modified) {
         this.saveProducts(products); // Sync local & Plesk backend automatically!
       }

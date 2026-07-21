@@ -75,7 +75,7 @@ export default class EmailPreview {
               💳 <strong>${isEn ? "Credit Card via Stripe:" : "Tarjeta de Crédito via Stripe:"}</strong> ${isEn ? "The transaction has been successfully processed and verified via our Stripe gateway. A digital invoice is attached below." : "El pago se ha completado correctamente a través de nuestra pasarela cifrada de Stripe. Se adjunta el recibo digital de cobro comercial."}
             ` : `
               🏦 <strong>${isEn ? "Direct Bank Transfer:" : "Transferencia Bancaria Directa:"}</strong> ${isEn ? `Please notice that your refrigerated truck loading slot remains pending until we receive the transfer proof for <strong>${order.total.toFixed(2)} €</strong>.` : `Le recordamos que su pedido queda reservado pero no será cargado en el transporte refrigerado hasta que recibamos el justificante de la transferencia bancaria por valor de <strong>${order.total.toFixed(2)} €</strong>.`}<br>
-              <strong>${isEn ? "Bank:" : "Banco:"}</strong> Banco Santander | <strong>IBAN:</strong> ES21 0049 1500 2312 3456 7890<br>
+              <strong>${isEn ? "Bank:" : "Banco:"}</strong> Banco Santander | <strong>IBAN:</strong> ES48 3058 0776 8127 2004 3134<br>
               <strong>${isEn ? "Reference:" : "Concepto:"}</strong> PEDIDO PRO #${order.orderId}
             `}</p>
 
@@ -86,7 +86,7 @@ export default class EmailPreview {
             <hr style="border: 0; border-top: 1px solid #eae3d2; margin: 30px 0;">
 
             <p style="font-size: 12px; color: #777; text-align: center;">
-              Croqon Premium Croquetas S.L. - Marbella - Costa del Sol<br>
+              Loo Invest Immo, S.L. - Benalmádena - Costa del Sol<br>
               ${isEn ? "Need assistance? Contact us at orders@croqon.com or reply to this message." : "¿Tiene dudas logísticas? Contáctenos a pedidos@croqon.com o responda a este email."}
             </p>
           </div>

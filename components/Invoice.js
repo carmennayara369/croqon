@@ -22,10 +22,10 @@ export default class Invoice {
               </div>
             </div>
             <div class="invoice-company-details" style="margin-top: 10px;">
-              <strong>CROQON PREMIUM CROQUETAS S.L.</strong><br>
-              CIF: B29837482<br>
-              Avenida Bulevar Príncipe de Marbella, 45<br>
-              29602 Marbella, Málaga (España)<br>
+              <strong>Loo Invest Immo, S.L.</strong><br>
+              CIF: B13721766<br>
+              Calle Rododendro, 59<br>
+              29639 Benalmádena, Málaga (España)<br>
               Email: logistica@croqon.com | Tel: +34 951 123 456
             </div>
           </div>
@@ -105,7 +105,7 @@ export default class Invoice {
             ` : `
               <p><strong>${isEn ? "Bank Transfer Details:" : "Detalles de Transferencia Bancaria:"}</strong><br>
               ${isEn ? "Please make the bank transfer using the following details:" : "Por favor, efectúe el pago a la cuenta del Banco Santander:"} <br>
-              <strong>ES21 0049 1500 2312 3456 7890</strong><br>
+              <strong>ES48 3058 0776 8127 2004 3134</strong><br>
               ${isEn ? "Reference:" : "Concepto:"} <strong>FACTURA INV-${order.orderId.split("-")[1] || order.orderId}</strong><br>
               ${isEn ? "Please send the bank transfer proof to logistica@croqon.com to release your cold-truck loading slot." : "Envíe el justificante de transferencia bancaria a logistica@croqon.com para programar la carga en el camión refrigerado."}</p>
             `}

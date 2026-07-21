@@ -298,6 +298,7 @@ export default class AdminDashboard {
           <div class="card-header-admin">
             <h3>Historial de Pedidos Logísticos</h3>
             <div class="card-header-actions">
+              <button id="btn-admin-add-order" class="btn-text" style="color: var(--color-gold-light); font-weight: bold;">➕ Crear Pedido</button>
               <button id="btn-admin-generate-demo" class="btn-text" title="Generar Pedidos de Prueba">⚡ Simular Pedidos</button>
               <button id="btn-admin-clear-all" class="btn-text text-danger" title="Borrar Historial">🗑️ Limpiar Todo</button>
             </div>
@@ -353,7 +354,7 @@ export default class AdminDashboard {
 
         <!-- Order Details Card (Right) -->
         <div class="admin-detail-card" id="admin-detail-panel">
-          ${this.renderOrderDetailPanel(selectedOrder)}
+          ${this.selectedOrderId === "new_manual" ? this.renderManualOrderForm() : this.renderOrderDetailPanel(selectedOrder)}
         </div>
       </div>
     `;
@@ -459,14 +460,174 @@ export default class AdminDashboard {
           </div>
         </div>
 
-        <div class="detail-actions-footer-row">
-          <button class="btn-secondary" id="btn-admin-print-slip" data-id="${order.orderId}">
-            <span>🖨️ Imprimir Albarán</span>
+        <div class="detail-actions-footer-row" style="display: flex; gap: 10px;">
+          <button class="btn-secondary btn-small" id="btn-admin-print-slip" data-id="${order.orderId}">
+            <span>🖨️ Albarán</span>
           </button>
-          <button class="btn-text text-danger" id="btn-admin-delete-order" data-id="${order.orderId}" style="margin-left: auto;">
-            <span>Eliminar Pedido</span>
+          <button class="btn-primary btn-small" id="btn-admin-print-invoice" data-id="${order.orderId}">
+            <span>📄 Factura B2B</span>
+          </button>
+          <button class="btn-text text-danger btn-small" id="btn-admin-delete-order" data-id="${order.orderId}" style="margin-left: auto;">
+            <span>Eliminar</span>
           </button>
         </div>
+      </div>
+    `;
+  }
+
+  getNextDeliveryDays() {
+    const days = [];
+    const date = new Date();
+    const isEn = this.app.lang === "en";
+    
+    for (let i = 1; i <= 14; i++) {
+      const nextDate = new Date();
+      nextDate.setDate(date.getDate() + i);
+      const dayOfWeek = nextDate.getDay();
+      
+      if (dayOfWeek === 2) {
+        days.push({
+          iso: nextDate.toISOString().split("T")[0],
+          formatted: isEn 
+            ? `Tuesday, ${nextDate.toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" })}`
+            : `Martes, ${nextDate.toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" })}`
+        });
+      } else if (dayOfWeek === 5) {
+        days.push({
+          iso: nextDate.toISOString().split("T")[0],
+          formatted: isEn 
+            ? `Friday, ${nextDate.toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" })}`
+            : `Viernes, ${nextDate.toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" })}`
+        });
+      }
+
+      if (days.length === 2) break;
+    }
+
+    return days;
+  }
+
+  renderManualOrderForm() {
+    const clients = this.app.getClients();
+    const products = this.app.getProducts();
+    const nextDays = this.getNextDeliveryDays();
+
+    return `
+      <div class="admin-order-detail-wrap fade-in" style="max-height: 80vh; overflow-y: auto; padding-right: 8px;">
+        <div class="detail-header" style="margin-bottom: 20px;">
+          <h3>Crear Pedido B2B Manual</h3>
+          <span class="detail-time">Nueva Operación Logística</span>
+        </div>
+
+        <form id="admin-manual-order-form" class="gateway-form" style="padding: 0; background: transparent; border: none; box-shadow: none;">
+          <div class="form-group">
+            <label for="manual-client-select" style="color: var(--color-gold-light); font-weight: bold;">Establecimiento Registrado *</label>
+            <select id="manual-client-select" style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: var(--color-text-light); width: 100%; padding: 10px; border-radius: 4px;">
+              <option value="">-- Cliente Personalizado / Nuevo --</option>
+              ${clients.map(c => `<option value="${c.cif}">${c.name} (${c.cif})</option>`).join("")}
+            </select>
+          </div>
+
+          <!-- Client details fields -->
+          <div id="manual-client-fields" style="display: flex; flex-direction: column; gap: 12px; margin-top: 15px; border-top: 1px dashed rgba(255,255,255,0.05); padding-top: 15px;">
+            <div class="form-group">
+              <label for="manual-company-name">Nombre / Razón Social Comercial *</label>
+              <input type="text" id="manual-company-name" required placeholder="Ej: Gastrobar La Marea Marbella S.L.">
+            </div>
+            <div class="form-row" style="display: flex; gap: 15px;">
+              <div class="form-group" style="flex: 1;">
+                <label for="manual-cif">CIF / NIF *</label>
+                <input type="text" id="manual-cif" required placeholder="Ej: B93848201">
+              </div>
+              <div class="form-group" style="flex: 1;">
+                <label for="manual-contact">Chef / Responsable Compras *</label>
+                <input type="text" id="manual-contact" required placeholder="Ej: Chef Carlos Martínez">
+              </div>
+            </div>
+            <div class="form-row" style="display: flex; gap: 15px;">
+              <div class="form-group" style="flex: 1;">
+                <label for="manual-phone">Teléfono de Cocina *</label>
+                <input type="tel" id="manual-phone" required placeholder="Ej: +34 654 987 321">
+              </div>
+              <div class="form-group" style="flex: 2;">
+                <label for="manual-email">Email Notificaciones B2B *</label>
+                <input type="email" id="manual-email" required placeholder="Ej: compras@lamareamarbella.com">
+              </div>
+            </div>
+          </div>
+
+          <!-- Logistics fields -->
+          <div style="margin-top: 20px; border-top: 1px dashed rgba(255,255,255,0.05); padding-top: 15px; display: flex; flex-direction: column; gap: 12px;">
+            <div class="form-group">
+              <label for="manual-address">Dirección de Reparto (Establecimiento) *</label>
+              <input type="text" id="manual-address" required placeholder="Ej: Avenida Bulevar Príncipe Alfonso de Hohenlohe, S/N">
+            </div>
+            <div class="form-row" style="display: flex; gap: 15px;">
+              <div class="form-group" style="flex: 2;">
+                <label for="manual-city">Ciudad (Málaga / Costa del Sol) *</label>
+                <select id="manual-city" required style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: var(--color-text-light); width: 100%; padding: 10px; border-radius: 4px;">
+                  <option value="marbella">Marbella</option>
+                  <option value="malaga">Málaga Centro</option>
+                  <option value="estepona">Estepona</option>
+                  <option value="fuengirola">Fuengirola</option>
+                  <option value="torremolinos">Torremolinos</option>
+                  <option value="benalmadena">Benalmádena</option>
+                </select>
+              </div>
+              <div class="form-group" style="flex: 1;">
+                <label for="manual-postal">Código Postal *</label>
+                <input type="text" id="manual-postal" required placeholder="29602" pattern="^[0-9]{5}$">
+              </div>
+            </div>
+
+            <div class="form-row" style="display: flex; gap: 15px;">
+              <div class="form-group" style="flex: 2;">
+                <label for="manual-delivery-date">Fecha de Reparto Programada *</label>
+                <select id="manual-delivery-date" required style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: var(--color-text-light); width: 100%; padding: 10px; border-radius: 4px;">
+                  <option value="${nextDays[0].iso}">${nextDays[0].formatted} (Logística Martes)</option>
+                  <option value="${nextDays[1].iso}">${nextDays[1].formatted} (Logística Viernes)</option>
+                </select>
+              </div>
+              <div class="form-group" style="flex: 1;">
+                <label for="manual-payment-method">Forma de Pago B2B *</label>
+                <select id="manual-payment-method" required style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: var(--color-text-light); width: 100%; padding: 10px; border-radius: 4px;">
+                  <option value="transfer">Transferencia</option>
+                  <option value="stripe">Tarjeta (Stripe)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Product quantities section -->
+          <div class="detail-section-box" style="margin-top: 20px;">
+            <h4 style="margin-bottom: 12px; color: var(--color-gold-light);">Unidades en Pedido (Cajas de 150 uds / 70 uds)</h4>
+            <div class="manual-products-list" style="display: flex; flex-direction: column; gap: 12px;">
+              ${products.map(p => {
+                const name = this.app.lang === "en" && p.name_en ? p.name_en : p.name;
+                return `
+                  <div class="manual-prod-row" style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 8px;">
+                    <div style="flex: 1; padding-right: 15px;">
+                      <strong style="font-size: 13px; color: var(--color-text-light);">${name}</strong><br>
+                      <small style="color: var(--color-text-muted); font-size: 11px;">Caja de ${p.units} uds | ${p.price.toFixed(2)} €/caja HT</small>
+                    </div>
+                    <div style="width: 80px;">
+                      <input type="number" class="manual-qty-input" data-prod-id="${p.id}" value="0" min="0" max="99" style="text-align: center; font-weight: bold; width: 100%; padding: 6px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: var(--color-text-light); border-radius: 4px;">
+                    </div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          </div>
+
+          <div style="margin-top: 25px; display: flex; gap: 15px;">
+            <button type="submit" class="btn-primary" style="flex: 1;">
+              <span>Crear y Sincronizar Pedido</span>
+            </button>
+            <button type="button" class="btn-secondary" id="btn-admin-cancel-manual-order" style="flex: 1;">
+              <span>Cancelar</span>
+            </button>
+          </div>
+        </form>
       </div>
     `;
   }
@@ -1009,12 +1170,219 @@ export default class AdminDashboard {
         });
       }
 
-      // Print delivery slip
-      const printSlipBtn = document.getElementById("btn-admin-print-slip");
-      if (printSlipBtn) {
-        printSlipBtn.addEventListener("click", (e) => {
+      }
+
+      // Add manual order button click listener
+      const addOrderBtn = document.getElementById("btn-admin-add-order");
+      if (addOrderBtn) {
+        addOrderBtn.addEventListener("click", () => {
+          this.selectedOrderId = "new_manual";
+          this.render();
+        });
+      }
+
+      // Cancel manual order button click listener
+      const cancelManualOrderBtn = document.getElementById("btn-admin-cancel-manual-order");
+      if (cancelManualOrderBtn) {
+        cancelManualOrderBtn.addEventListener("click", () => {
+          this.selectedOrderId = null;
+          this.render();
+        });
+      }
+
+      // Client dropdown auto-fill logic
+      const clientSelect = document.getElementById("manual-client-select");
+      if (clientSelect) {
+        clientSelect.addEventListener("change", (e) => {
+          const cifVal = e.target.value;
+          const compInput = document.getElementById("manual-company-name");
+          const cifInput = document.getElementById("manual-cif");
+          const contactInput = document.getElementById("manual-contact");
+          const phoneInput = document.getElementById("manual-phone");
+          const emailInput = document.getElementById("manual-email");
+          const addressInput = document.getElementById("manual-address");
+          const cityInput = document.getElementById("manual-city");
+          const postalInput = document.getElementById("manual-postal");
+
+          if (!cifVal) {
+            // Clear fields for custom
+            if (compInput) compInput.value = "";
+            if (cifInput) cifInput.value = "";
+            if (contactInput) contactInput.value = "";
+            if (phoneInput) phoneInput.value = "";
+            if (emailInput) emailInput.value = "";
+            if (addressInput) addressInput.value = "";
+            if (postalInput) postalInput.value = "";
+          } else {
+            const clients = this.app.getClients();
+            const client = clients.find(c => c.cif === cifVal);
+            if (client) {
+              if (compInput) compInput.value = client.name;
+              if (cifInput) cifInput.value = client.cif;
+              if (contactInput) contactInput.value = client.contact;
+              if (phoneInput) phoneInput.value = client.phone;
+              if (emailInput) emailInput.value = client.email;
+              
+              // Smart defaults for address if it's the demo client
+              if (client.cif === "B93848201") {
+                if (addressInput) addressInput.value = "Avenida Bulevar Príncipe Alfonso de Hohenlohe, S/N";
+                if (cityInput) cityInput.value = "marbella";
+                if (postalInput) postalInput.value = "29602";
+              } else {
+                if (addressInput) addressInput.value = "";
+                if (postalInput) postalInput.value = "";
+              }
+            }
+          }
+        });
+      }
+
+      // Manual order form submit handler
+      const manualOrderForm = document.getElementById("admin-manual-order-form");
+      if (manualOrderForm) {
+        manualOrderForm.addEventListener("submit", (e) => {
+          e.preventDefault();
+
+          const companyName = document.getElementById("manual-company-name").value;
+          const cif = document.getElementById("manual-cif").value;
+          const contact = document.getElementById("manual-contact").value;
+          const phone = document.getElementById("manual-phone").value;
+          const email = document.getElementById("manual-email").value;
+
+          const address = document.getElementById("manual-address").value;
+          const city = document.getElementById("manual-city").value;
+          const postal = document.getElementById("manual-postal").value;
+
+          const deliveryDateSelect = document.getElementById("manual-delivery-date");
+          const deliveryDateStr = deliveryDateSelect.options[deliveryDateSelect.selectedIndex].text;
+          const deliveryDateIso = deliveryDateSelect.value;
+
+          const paymentMethod = document.getElementById("manual-payment-method").value;
+
+          // Gather quantities
+          const orderItems = [];
+          let totalBoxes = 0;
+          const products = this.app.getProducts();
+
+          document.querySelectorAll(".manual-qty-input").forEach(input => {
+            const prodId = input.dataset.prodId;
+            const quantity = parseInt(input.value) || 0;
+            if (quantity > 0) {
+              const prod = products.find(p => p.id === prodId);
+              if (prod) {
+                orderItems.push({
+                  id: prod.id,
+                  name: prod.name,
+                  name_en: prod.name_en || prod.name,
+                  price: prod.price,
+                  units: prod.units,
+                  quantity: quantity
+                });
+                totalBoxes += quantity;
+              }
+            }
+          });
+
+          // Validation
+          if (totalBoxes < 2) {
+            alert(this.app.lang === "en" 
+              ? "Minimum order volume is 2 boxes. Please adjust quantities." 
+              : "El volumen mínimo de pedido profesional es de 2 cajas. Ajuste las cantidades.");
+            return;
+          }
+
+          // Calculate subtotal, vat, total
+          let subtotal = 0;
+          orderItems.forEach(item => {
+            subtotal += item.price * item.quantity;
+          });
+          const vat = subtotal * 0.10;
+          const total = subtotal + vat;
+
+          // Generate order ID
+          const orderId = "CRQ-" + Math.floor(100000 + Math.random() * 90000);
+
+          const orderObj = {
+            orderId: orderId,
+            date: new Date().toLocaleDateString(this.app.lang === "en" ? "en-US" : "es-ES", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }),
+            user: {
+              name: companyName,
+              cif: cif,
+              contact: contact,
+              phone: phone,
+              email: email,
+              sector: "restaurant"
+            },
+            delivery: {
+              address: address,
+              city: city,
+              postal: postal,
+              dateStr: deliveryDateStr,
+            },
+            billing: {
+              company: companyName,
+              address: address,
+              cif: cif
+            },
+            payment: {
+              method: paymentMethod,
+              status: paymentMethod === "stripe" ? "paid" : "pending",
+              cardHolder: paymentMethod === "stripe" ? "Gestión Admin" : null
+            },
+            items: orderItems,
+            subtotal: subtotal,
+            vat: vat,
+            total: total,
+            logisticsStatus: "pending"
+          };
+
+          const orders = this.getOrders();
+          orders.push(orderObj);
+          this.saveOrders(orders);
+
+          this.selectedOrderId = orderId;
+          alert(this.app.lang === "en" 
+            ? "Manual B2B order successfully created and synced!" 
+            : "¡Pedido B2B manual creado y sincronizado con éxito!");
+          this.render();
+        });
+      }
+
+      // Print invoice button listener
+      const printInvoiceBtn = document.getElementById("btn-admin-print-invoice");
+      if (printInvoiceBtn) {
+        printInvoiceBtn.addEventListener("click", (e) => {
           const orderId = e.currentTarget.dataset.id;
-          alert(`Preparando impresión de albarán para el reparto #${orderId}. Se llamará a la función de impresión de hoja de ruta.`);
+          const orders = this.getOrders();
+          const order = orders.find(o => o.orderId === orderId);
+          if (order) {
+            import("./Invoice.js").then(module => {
+              const InvoiceClass = module.default;
+              const printWindow = window.open("", "_blank");
+              printWindow.document.write(`
+                <html>
+                  <head>
+                    <title>Factura B2B - #${order.orderId}</title>
+                    <link rel="stylesheet" href="index.css">
+                    <style>
+                      body { background: white !important; color: #111111 !important; padding: 20px; font-family: 'Inter', sans-serif; }
+                      .invoice-sheet { box-shadow: none !important; border: none !important; margin: 0 auto; max-width: 800px; display: block !important; }
+                      @media print {
+                        body { padding: 0 !important; }
+                      }
+                    </style>
+                  </head>
+                  <body onload="window.print()">
+                    ${InvoiceClass.renderHTML(order, this.app.lang || "es")}
+                  </body>
+                </html>
+              `);
+              printWindow.document.close();
+            }).catch(err => {
+              console.error("Failed to dynamically load Invoice component for printing", err);
+              alert("Error al cargar la factura para impresión.");
+            });
+          }
         });
       }
     }

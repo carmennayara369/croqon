@@ -199,7 +199,7 @@ export const translations = {
     inv_pay_detail_stripe: "Payment Details: Payment verified and captured via secure Stripe gateway.",
     inv_pay_detail_transfer: "Bank Transfer Details: Please send the bank transfer proof to logistica@croqon.com.",
     inv_footer_terms: "Store at -18°C. Do not refreeze after thawing. Fry at 180°C for 3-4 minutes.",
-    inv_thanks: "THANK YOU FOR YOUR BUSINESS - CROQON PREMIUM CROQUETAS",
+    inv_thanks: "THANK YOU FOR YOUR BUSINESS - LOO INVEST IMMO, S.L.",
 
     // Admin Panel (AdminDashboard.js)
     adm_pass_title: "B2B Administration",
