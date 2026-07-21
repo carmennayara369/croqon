@@ -137,7 +137,11 @@ export default class Catalog {
           
           <div class="product-specs">
             <span class="spec-tag">${this.app.lang === "en" ? `Box of ${product.units} units` : `Caja de ${product.units} unidades`}</span>
-            <span class="spec-tag">${this.app.lang === "en" ? "Net weight: 4.5 kg (30g/unit)" : "Peso neto: 4,5 kg (30g/ud)"}</span>
+            <span class="spec-tag">${this.app.lang === "en" ? "Net weight: 4.5 kg" : "Peso neto: 4,5 kg"} (${product.weight}g/ud)</span>
+            ${product.stock === 0 
+              ? `<span class="spec-tag out-of-stock" style="color: #e74c3c; font-weight: bold; border-color: #e74c3c;">${this.app.lang === "en" ? "OUT OF STOCK" : "SIN STOCK"}</span>` 
+              : `<span class="spec-tag ${product.stock <= 5 ? "low-stock" : ""}" ${product.stock <= 5 ? 'style="color: #e74c3c; font-weight: bold; border-color: #e74c3c;"' : ""}>${this.app.lang === "en" ? "Stock: " : "Stock: "}<strong>${product.stock !== undefined ? product.stock : 100}</strong> ${this.app.lang === "en" ? "boxes" : "cajas"}</span>`
+            }
           </div>
 
           <details class="product-details-dropdown">
@@ -156,14 +160,18 @@ export default class Catalog {
             </div>
             
             <div class="quantity-selector-block">
-              <div class="quantity-controller">
-                <button class="qty-btn qty-minus" data-id="${product.id}">-</button>
-                <input type="number" class="qty-input" data-id="${product.id}" value="${quantity}" min="0" max="99">
-                <button class="qty-btn qty-plus" data-id="${product.id}">+</button>
-              </div>
-              <button class="btn-update-cart ${quantity > 0 ? "in-cart" : ""}" data-id="${product.id}">
-                <span>${quantity > 0 ? this.app.t("cat_btn_update", "Actualizar") : this.app.t("cat_btn_add", "Añadir")}</span>
-              </button>
+              ${product.stock === 0 ? `
+                <span class="sold-out-msg" style="color: #e74c3c; font-weight: bold; font-size: 13px;">${this.app.lang === "en" ? "Agotado (Out of Stock)" : "Agotado (Sin Stock)"}</span>
+              ` : `
+                <div class="quantity-controller">
+                  <button class="qty-btn qty-minus" data-id="${product.id}">-</button>
+                  <input type="number" class="qty-input" data-id="${product.id}" value="${quantity}" min="0" max="${product.stock !== undefined ? product.stock : 100}">
+                  <button class="qty-btn qty-plus" data-id="${product.id}">+</button>
+                </div>
+                <button class="btn-update-cart ${quantity > 0 ? "in-cart" : ""}" data-id="${product.id}">
+                  <span>${quantity > 0 ? this.app.t("cat_btn_update", "Actualizar") : this.app.t("cat_btn_add", "Añadir")}</span>
+                </button>
+              `}
             </div>
           </div>
         </div>
@@ -296,8 +304,16 @@ export default class Catalog {
       btn.addEventListener("click", (e) => {
         const id = e.target.dataset.id;
         const input = document.querySelector(`.qty-input[data-id="${id}"]`);
+        const product = this.app.getProducts().find(p => p.id === id);
+        const maxStock = product && product.stock !== undefined ? product.stock : 100;
         if (input) {
           let val = parseInt(input.value) || 0;
+          if (val >= maxStock) {
+            alert(this.app.lang === "en"
+              ? `Cannot exceed available stock (${maxStock} boxes).`
+              : `No se puede superar el stock disponible (${maxStock} cajas).`);
+            return;
+          }
           input.value = val + 1;
           this.handleQuantityInputChanged(id, val + 1);
         }
@@ -307,8 +323,16 @@ export default class Catalog {
     qtyInputs.forEach(input => {
       input.addEventListener("change", (e) => {
         const id = e.target.dataset.id;
+        const product = this.app.getProducts().find(p => p.id === id);
+        const maxStock = product && product.stock !== undefined ? product.stock : 100;
         let val = parseInt(e.target.value) || 0;
         if (val < 0) val = 0;
+        if (val > maxStock) {
+          alert(this.app.lang === "en"
+            ? `Cannot exceed available stock (${maxStock} boxes). Resetting quantity.`
+            : `No se puede superar el stock disponible (${maxStock} cajas). Restableciendo cantidad.`);
+          val = maxStock;
+        }
         e.target.value = val;
         this.handleQuantityInputChanged(id, val);
       });

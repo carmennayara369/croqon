@@ -76,6 +76,14 @@ class App {
         }
       });
 
+      // Ensure all products have a stock count defined
+      products.forEach(p => {
+        if (p.stock === undefined) {
+          p.stock = 100;
+          modified = true;
+        }
+      });
+
       if (modified) {
         this.saveProducts(products); // Sync local & Plesk backend automatically!
       }

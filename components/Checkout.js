@@ -518,6 +518,16 @@ export default class Checkout {
         orders.push(order);
         localStorage.setItem("croqon_b2b_orders", JSON.stringify(orders));
 
+        // Deduct stock for ordered items
+        const products = this.app.getProducts();
+        order.items.forEach(orderItem => {
+          const prod = products.find(p => p.id === orderItem.id);
+          if (prod) {
+            prod.stock = Math.max(0, (prod.stock !== undefined ? prod.stock : 100) - orderItem.quantity);
+          }
+        });
+        this.app.saveProducts(products); // Syncs to server immediately!
+
         // Push to Plesk PHP shared database file
         fetch("api.php?action=save_orders", {
           method: "POST",

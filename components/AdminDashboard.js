@@ -732,14 +732,18 @@ export default class AdminDashboard {
             </div>
           </div>
 
-          <div class="form-row">
-            <div class="form-group">
+          <div class="form-row" style="display: flex; gap: 15px;">
+            <div class="form-group" style="flex: 1;">
               <label for="edit-prod-units">Unidades por Caja *</label>
               <input type="number" id="edit-prod-units" required value="${p.units}">
             </div>
-            <div class="form-group">
+            <div class="form-group" style="flex: 1;">
               <label for="edit-prod-weight">Peso por Croqueta (g) *</label>
               <input type="number" id="edit-prod-weight" required value="${p.weight}">
+            </div>
+            <div class="form-group" style="flex: 1;">
+              <label for="edit-prod-stock">Stock Disponible (Cajas) *</label>
+              <input type="number" id="edit-prod-stock" required value="${p.stock !== undefined ? p.stock : 100}">
             </div>
           </div>
 
@@ -803,7 +807,8 @@ export default class AdminDashboard {
         <div class="admin-list-card">
           <div class="card-header-admin">
             <h3>Establecimientos Registrados</h3>
-            <div class="card-header-actions">
+            <div class="card-header-actions" style="display: flex; align-items: center;">
+              <button id="btn-admin-add-client" class="btn-text" style="color: var(--color-gold-light); font-weight: bold; margin-right: 15px;">➕ Crear Cliente</button>
               <span style="color: var(--color-gold); font-size: 13px; font-weight: bold;">Total: ${clients.length}</span>
             </div>
           </div>
@@ -838,7 +843,7 @@ export default class AdminDashboard {
 
         <!-- Client Profile Details & PIN Reset (Right) -->
         <div class="admin-detail-card">
-          ${this.renderClientEditPanel(selectedClient)}
+          ${this.selectedClientCif === "new" ? this.renderClientCreateForm() : this.renderClientEditPanel(selectedClient)}
         </div>
       </div>
     `;
@@ -914,6 +919,72 @@ export default class AdminDashboard {
             </button>
             <button type="button" class="btn-secondary text-danger" id="btn-admin-delete-client" data-cif="${client.cif}">
               <span>Dar de Baja Cliente</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    `;
+  }
+
+  renderClientCreateForm() {
+    // Generate a random 4-digit PIN for access
+    const randomPin = Math.floor(1000 + Math.random() * 9000).toString();
+
+    return `
+      <div class="admin-order-detail-wrap fade-in">
+        <div class="detail-header" style="margin-bottom: 20px;">
+          <h3>Registrar Establecimiento B2B</h3>
+          <span class="detail-time">Crear Perfil del Cliente</span>
+        </div>
+
+        <form id="admin-manual-client-form" class="gateway-form" style="padding: 0; background: transparent; border: none; box-shadow: none;">
+          <div class="form-group">
+            <label for="reg-company-name">Nombre / Razón Social Comercial *</label>
+            <input type="text" id="reg-company-name" required placeholder="Ej: Ocean Beach Club Marbella S.L.">
+          </div>
+          <div class="form-row" style="display: flex; gap: 15px;">
+            <div class="form-group" style="flex: 1;">
+              <label for="reg-cif">CIF / NIF / SIRET *</label>
+              <input type="text" id="reg-cif" required placeholder="Ej: B29302919">
+            </div>
+            <div class="form-group" style="flex: 1;">
+              <label for="reg-contact">Chef / Responsable Compras *</label>
+              <input type="text" id="reg-contact" required placeholder="Ej: Chef Antonio Ruiz">
+            </div>
+          </div>
+          <div class="form-row" style="display: flex; gap: 15px;">
+            <div class="form-group" style="flex: 1;">
+              <label for="reg-phone">Teléfono de Cocina *</label>
+              <input type="tel" id="reg-phone" required placeholder="Ej: +34 670 987 654">
+            </div>
+            <div class="form-group" style="flex: 2;">
+              <label for="reg-email">Email Comercial *</label>
+              <input type="email" id="reg-email" required placeholder="Ej: compras@oceanbeachmarbella.com">
+            </div>
+          </div>
+
+          <div class="form-row" style="display: flex; gap: 15px;">
+            <div class="form-group" style="flex: 1;">
+              <label for="reg-sector">Sector Profesional *</label>
+              <select id="reg-sector" required style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: var(--color-text-light); width: 100%; padding: 10px; border-radius: 4px;">
+                <option value="restaurant">Restaurante / Gastrobar</option>
+                <option value="hotel">Hotel / Catering</option>
+                <option value="beach-club">Beach Club / Chiringuito</option>
+                <option value="distributor">Distribuidor Gourmet</option>
+              </select>
+            </div>
+            <div class="form-group" style="flex: 1;">
+              <label for="reg-pin">Código PIN de Acceso *</label>
+              <input type="text" id="reg-pin" required value="${randomPin}" maxlength="4" style="font-family: monospace; font-weight: bold; text-align: center; color: var(--color-gold); background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; padding: 10px;">
+            </div>
+          </div>
+
+          <div style="margin-top: 25px; display: flex; gap: 15px;">
+            <button type="submit" class="btn-primary" style="flex: 1;">
+              <span>Registrar y Activar Cliente</span>
+            </button>
+            <button type="button" class="btn-secondary" id="btn-admin-cancel-client-creation" style="flex: 1;">
+              <span>Cancelar</span>
             </button>
           </div>
         </form>
@@ -1261,6 +1332,7 @@ export default class AdminDashboard {
           const orderItems = [];
           let totalBoxes = 0;
           const products = this.app.getProducts();
+          let stockError = null;
 
           document.querySelectorAll(".manual-qty-input").forEach(input => {
             const prodId = input.dataset.prodId;
@@ -1268,6 +1340,10 @@ export default class AdminDashboard {
             if (quantity > 0) {
               const prod = products.find(p => p.id === prodId);
               if (prod) {
+                const maxStock = prod.stock !== undefined ? prod.stock : 100;
+                if (quantity > maxStock) {
+                  stockError = `No hay suficiente stock para: ${prod.name}. Stock disponible: ${maxStock} cajas.`;
+                }
                 orderItems.push({
                   id: prod.id,
                   name: prod.name,
@@ -1280,6 +1356,12 @@ export default class AdminDashboard {
               }
             }
           });
+
+          // Stock level validation check
+          if (stockError) {
+            alert(stockError);
+            return;
+          }
 
           // Validation
           if (totalBoxes < 2) {
@@ -1337,6 +1419,15 @@ export default class AdminDashboard {
           const orders = this.getOrders();
           orders.push(orderObj);
           this.saveOrders(orders);
+
+          // Deduct stock for ordered items
+          orderItems.forEach(orderItem => {
+            const prod = products.find(p => p.id === orderItem.id);
+            if (prod) {
+              prod.stock = Math.max(0, (prod.stock !== undefined ? prod.stock : 100) - orderItem.quantity);
+            }
+          });
+          this.app.saveProducts(products); // Syncs to server immediately!
 
           this.selectedOrderId = orderId;
           alert(this.app.lang === "en" 
@@ -1466,7 +1557,8 @@ export default class AdminDashboard {
             allergens: existingProduct.allergens || ["Gluten", "Lácteos", "Huevo"],
             imageType: imagePath ? "file" : "grid",
             imageClass: existingProduct.imageClass || "img-jamon-iberico",
-            imagePath: imagePath
+            imagePath: imagePath,
+            stock: parseInt(document.getElementById("edit-prod-stock").value) || 0
           };
 
           const existingIndex = products.findIndex(p => p.id === prodId);
@@ -1564,6 +1656,64 @@ export default class AdminDashboard {
             this.selectedClientCif = null;
             this.render();
           }
+        });
+      }
+
+      // Add Client Button click
+      const addClientBtn = document.getElementById("btn-admin-add-client");
+      if (addClientBtn) {
+        addClientBtn.addEventListener("click", () => {
+          this.selectedClientCif = "new";
+          this.render();
+        });
+      }
+
+      // Cancel Client Creation click
+      const cancelClientBtn = document.getElementById("btn-admin-cancel-client-creation");
+      if (cancelClientBtn) {
+        cancelClientBtn.addEventListener("click", () => {
+          this.selectedClientCif = null;
+          this.render();
+        });
+      }
+
+      // Manual Client Create form submit
+      const manualClientForm = document.getElementById("admin-manual-client-form");
+      if (manualClientForm) {
+        manualClientForm.addEventListener("submit", (e) => {
+          e.preventDefault();
+
+          const companyName = document.getElementById("reg-company-name").value.trim();
+          const cif = document.getElementById("reg-cif").value.trim().toUpperCase();
+          const contact = document.getElementById("reg-contact").value.trim();
+          const phone = document.getElementById("reg-phone").value.trim();
+          const email = document.getElementById("reg-email").value.trim();
+          const sector = document.getElementById("reg-sector").value;
+          const pin = document.getElementById("reg-pin").value.trim();
+
+          const clients = this.app.getClients();
+          const exists = clients.some(c => c.cif === cif);
+          if (exists) {
+            alert(`Error: Ya existe un establecimiento registrado con el CIF ${cif}.`);
+            return;
+          }
+
+          const newClient = {
+            name: companyName,
+            cif: cif,
+            contact: contact,
+            phone: phone,
+            email: email,
+            sector: sector,
+            pin: pin
+          };
+
+          clients.push(newClient);
+          this.app.saveClients(clients);
+
+          this.selectedClientCif = cif;
+          alert("Establecimiento registrado con éxito y sincronizado con el servidor.");
+          this.render();
         });
       }
     }
