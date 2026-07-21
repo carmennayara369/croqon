@@ -1170,8 +1170,6 @@ export default class AdminDashboard {
         });
       }
 
-      }
-
       // Add manual order button click listener
       const addOrderBtn = document.getElementById("btn-admin-add-order");
       if (addOrderBtn) {
