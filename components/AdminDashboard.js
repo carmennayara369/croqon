@@ -225,6 +225,51 @@ export default class AdminDashboard {
           </div>
         </div>
 
+        <!-- Stock Inventory Status Widget (Spans 2 columns) -->
+        <div class="analytics-widget-card" style="grid-column: span 2;">
+          <div class="widget-header" style="border-bottom: 1px solid var(--color-border-dark); padding-bottom: 12px; margin-bottom: 20px;">
+            <h3 style="font-family: var(--font-sans); font-weight: 700; color: var(--color-gold);">📊 Estado de Inventario (Obrador B2B)</h3>
+          </div>
+          <div class="widget-content">
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px;">
+              ${this.app.getProducts().map(p => {
+                const stockVal = p.stock !== undefined ? p.stock : 100;
+                let barColor = "#2ecc71"; // Green
+                let textColor = "#2ecc71";
+                let statusLabel = "Disponible";
+                
+                if (stockVal === 0) {
+                  barColor = "#e74c3c"; // Red
+                  textColor = "#e74c3c";
+                  statusLabel = "Agotado";
+                } else if (stockVal <= 5) {
+                  barColor = "#e67e22"; // Orange
+                  textColor = "#e67e22";
+                  statusLabel = "Stock Bajo";
+                }
+
+                // Max bar logic (assume 120 is full/max stock to visualize percentages)
+                const percent = Math.min(100, (stockVal / 120) * 100);
+
+                return `
+                  <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 4px; display: flex; flex-direction: column; gap: 8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: start; height: 36px;">
+                      <span style="font-weight: bold; font-size: 13px; color: var(--color-text-light); line-height: 1.2;">${p.name}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; margin-top: 5px;">
+                      <span style="color: ${textColor}; font-weight: bold; font-size: 14px;">${stockVal} cajas</span>
+                      <span style="font-size: 11px; text-transform: uppercase; background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 3px; color: #888; border: 1px solid rgba(255,255,255,0.05);">${statusLabel}</span>
+                    </div>
+                    <div class="bar-outer" style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; margin-top: 5px; width: 100%;">
+                      <div style="height: 100%; width: ${percent}%; background-color: ${barColor}; border-radius: 3px; transition: width 0.3s ease;"></div>
+                    </div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        </div>
+
         <!-- Recent Activity Feed -->
         <div class="analytics-widget-card" style="grid-column: span 2;">
           <div class="widget-header">
@@ -658,18 +703,32 @@ export default class AdminDashboard {
                   <th>Sabor / Variedad</th>
                   <th>Precio Caja HT</th>
                   <th>Formato</th>
+                  <th>Stock</th>
                   <th>Categoría</th>
                 </tr>
               </thead>
               <tbody>
-                ${products.map(p => `
-                  <tr class="admin-product-row ${p.id === this.selectedProductId ? "selected" : ""}" data-prod-id="${p.id}">
-                    <td><strong>${p.name}</strong><br><small style="color: #888;">${p.badge || "Gourmet"}</small></td>
-                    <td><strong>${p.price.toFixed(2)} €</strong></td>
-                    <td>${p.units} uds / ${p.weight}g</td>
-                    <td><span class="status-badge" style="background: rgba(197, 168, 128, 0.1); color: #c5a880;">${p.flavorProfile.split(" / ")[0]}</span></td>
-                  </tr>
-                `).join("")}
+                ${products.map(p => {
+                  const stockVal = p.stock !== undefined ? p.stock : 100;
+                  let stockStyle = "color: #2ecc71; font-weight: bold;"; // Green for sufficient stock
+                  let stockText = `${stockVal} cajas`;
+                  if (stockVal === 0) {
+                    stockStyle = "color: #e74c3c; font-weight: bold; background: rgba(231, 76, 60, 0.1); padding: 2px 6px; border-radius: 3px;";
+                    stockText = "Agotado";
+                  } else if (stockVal <= 5) {
+                    stockStyle = "color: #e67e22; font-weight: bold; background: rgba(230, 126, 34, 0.1); padding: 2px 6px; border-radius: 3px;";
+                    stockText = `${stockVal} (Bajo)`;
+                  }
+                  return `
+                    <tr class="admin-product-row ${p.id === this.selectedProductId ? "selected" : ""}" data-prod-id="${p.id}">
+                      <td><strong>${p.name}</strong><br><small style="color: #888;">${p.badge || "Gourmet"}</small></td>
+                      <td><strong>${p.price.toFixed(2)} €</strong></td>
+                      <td>${p.units} uds / ${p.weight}g</td>
+                      <td><span style="${stockStyle}">${stockText}</span></td>
+                      <td><span class="status-badge" style="background: rgba(197, 168, 128, 0.1); color: #c5a880;">${p.flavorProfile.split(" / ")[0]}</span></td>
+                    </tr>
+                  `;
+                }).join("")}
               </tbody>
             </table>
           </div>
