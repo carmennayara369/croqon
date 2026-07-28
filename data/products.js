@@ -19,7 +19,7 @@ export const products = [
     imagePath: "assets/images/product_manchego_semicurado.jpg",
     badge: "Receta Cremosa",
     badge_en: "Creamy Recipe",
-    stock: 100
+    stock: 15000
   },
   {
     id: "chorizo-iberico",
@@ -40,7 +40,7 @@ export const products = [
     imagePath: "assets/images/product_chorizo_iberico.jpg",
     badge: "Sabor Intenso",
     badge_en: "Intense Flavor",
-    stock: 100
+    stock: 15000
   },
   {
     id: "manchego-serrano",
@@ -61,7 +61,7 @@ export const products = [
     imagePath: "assets/images/product_manchego_serrano.jpg",
     badge: "Equilibrio Perfecto",
     badge_en: "Perfect Balance",
-    stock: 100
+    stock: 15000
   },
   {
     id: "jamon-iberico",
@@ -82,7 +82,7 @@ export const products = [
     imagePath: "assets/images/product_jamon_iberico.jpg",
     badge: "Joyas Gastronómicas",
     badge_en: "Gastronomic Jewel",
-    stock: 100
+    stock: 15000
   },
   {
     id: "jamon-serrano-gr",
@@ -102,7 +102,7 @@ export const products = [
     imageClass: "img-jamon-serrano-gr",
     badge: "Calidad Excepcional",
     badge_en: "Exceptional Quality",
-    stock: 100
+    stock: 15000
   },
   {
     id: "camaron-gris-65g",
@@ -123,7 +123,7 @@ export const products = [
     imagePath: "assets/images/box_packaging.jpg",
     badge: "Especialidad Belga",
     badge_en: "Belgian Specialty",
-    stock: 100
+    stock: 7000
   },
   {
     id: "camaron-gris-30g",
@@ -144,7 +144,7 @@ export const products = [
     imagePath: "assets/images/box_packaging.jpg",
     badge: "Formato Cóctel",
     badge_en: "Cocktail Format",
-    stock: 100
+    stock: 15000
   },
   {
     id: "sabor-temporada",
@@ -166,6 +166,6 @@ export const products = [
     imagePath: "assets/images/art_of_croquettes.jpg",
     badge: "Rotación Mensual",
     badge_en: "Monthly Rotation",
-    stock: 100
+    stock: 15000
   }
 ];

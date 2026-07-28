@@ -138,9 +138,9 @@ export default class Catalog {
           <div class="product-specs">
             <span class="spec-tag">${this.app.lang === "en" ? `Box of ${product.units} units` : `Caja de ${product.units} unidades`}</span>
             <span class="spec-tag">${this.app.lang === "en" ? "Net weight: 4.5 kg" : "Peso neto: 4,5 kg"} (${product.weight}g/ud)</span>
-            ${product.stock === 0 
+            ${Math.floor(product.stock / product.units) === 0 
               ? `<span class="spec-tag out-of-stock" style="color: #e74c3c; font-weight: bold; border-color: #e74c3c;">${this.app.lang === "en" ? "OUT OF STOCK" : "SIN STOCK"}</span>` 
-              : `<span class="spec-tag ${product.stock <= 5 ? "low-stock" : ""}" ${product.stock <= 5 ? 'style="color: #e74c3c; font-weight: bold; border-color: #e74c3c;"' : ""}>${this.app.lang === "en" ? "Stock: " : "Stock: "}<strong>${product.stock !== undefined ? product.stock : 100}</strong> ${this.app.lang === "en" ? "boxes" : "cajas"}</span>`
+              : `<span class="spec-tag ${Math.floor(product.stock / product.units) <= 5 ? "low-stock" : ""}" ${Math.floor(product.stock / product.units) <= 5 ? 'style="color: #e67e22; font-weight: bold; border-color: #e67e22;"' : ""}>${this.app.lang === "en" ? "Stock: " : "Stock: "}<strong>${Math.floor(product.stock / product.units)}</strong> ${this.app.lang === "en" ? "boxes" : "cajas"}</span>`
             }
           </div>
 
@@ -160,12 +160,12 @@ export default class Catalog {
             </div>
             
             <div class="quantity-selector-block">
-              ${product.stock === 0 ? `
+              ${Math.floor(product.stock / product.units) === 0 ? `
                 <span class="sold-out-msg" style="color: #e74c3c; font-weight: bold; font-size: 13px;">${this.app.lang === "en" ? "Agotado (Out of Stock)" : "Agotado (Sin Stock)"}</span>
               ` : `
                 <div class="quantity-controller">
                   <button class="qty-btn qty-minus" data-id="${product.id}">-</button>
-                  <input type="number" class="qty-input" data-id="${product.id}" value="${quantity}" min="0" max="${product.stock !== undefined ? product.stock : 100}">
+                  <input type="number" class="qty-input" data-id="${product.id}" value="${quantity}" min="0" max="${Math.floor(product.stock / product.units)}">
                   <button class="qty-btn qty-plus" data-id="${product.id}">+</button>
                 </div>
                 <button class="btn-update-cart ${quantity > 0 ? "in-cart" : ""}" data-id="${product.id}">
@@ -305,13 +305,13 @@ export default class Catalog {
         const id = e.target.dataset.id;
         const input = document.querySelector(`.qty-input[data-id="${id}"]`);
         const product = this.app.getProducts().find(p => p.id === id);
-        const maxStock = product && product.stock !== undefined ? product.stock : 100;
+        const maxBoxes = product ? Math.floor(product.stock / product.units) : 100;
         if (input) {
           let val = parseInt(input.value) || 0;
-          if (val >= maxStock) {
+          if (val >= maxBoxes) {
             alert(this.app.lang === "en"
-              ? `Cannot exceed available stock (${maxStock} boxes).`
-              : `No se puede superar el stock disponible (${maxStock} cajas).`);
+              ? `Cannot exceed available stock (${maxBoxes} boxes).`
+              : `No se puede superar el stock disponible (${maxBoxes} cajas).`);
             return;
           }
           input.value = val + 1;
@@ -324,14 +324,14 @@ export default class Catalog {
       input.addEventListener("change", (e) => {
         const id = e.target.dataset.id;
         const product = this.app.getProducts().find(p => p.id === id);
-        const maxStock = product && product.stock !== undefined ? product.stock : 100;
+        const maxBoxes = product ? Math.floor(product.stock / product.units) : 100;
         let val = parseInt(e.target.value) || 0;
         if (val < 0) val = 0;
-        if (val > maxStock) {
+        if (val > maxBoxes) {
           alert(this.app.lang === "en"
-            ? `Cannot exceed available stock (${maxStock} boxes). Resetting quantity.`
-            : `No se puede superar el stock disponible (${maxStock} cajas). Restableciendo cantidad.`);
-          val = maxStock;
+            ? `Cannot exceed available stock (${maxBoxes} boxes). Resetting quantity.`
+            : `No se puede superar el stock disponible (${maxBoxes} cajas). Restableciendo cantidad.`);
+          val = maxBoxes;
         }
         e.target.value = val;
         this.handleQuantityInputChanged(id, val);

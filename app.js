@@ -76,10 +76,14 @@ class App {
         }
       });
 
-      // Ensure all products have a stock count defined
+      // Ensure all products have a stock count defined and convert box stock to units if needed
       products.forEach(p => {
         if (p.stock === undefined) {
-          p.stock = 100;
+          p.stock = p.units * 100;
+          modified = true;
+        } else if (p.stock <= 150) {
+          // If stock is small (<= 150), it represents legacy box counts. Convert to individual croquette pieces!
+          p.stock = p.stock * p.units;
           modified = true;
         }
       });

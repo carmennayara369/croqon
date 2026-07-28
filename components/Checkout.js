@@ -523,7 +523,7 @@ export default class Checkout {
         order.items.forEach(orderItem => {
           const prod = products.find(p => p.id === orderItem.id);
           if (prod) {
-            prod.stock = Math.max(0, (prod.stock !== undefined ? prod.stock : 100) - orderItem.quantity);
+            prod.stock = Math.max(0, (prod.stock !== undefined ? prod.stock : 0) - (orderItem.quantity * prod.units));
           }
         });
         this.app.saveProducts(products); // Syncs to server immediately!

@@ -1,14 +1,34 @@
-// Invoice Component - Branded B2B Invoice Sheet
+// Invoice Component - Branded B2B Invoice / Delivery Slip Sheet
 export default class Invoice {
   static renderHTML(order, lang = "es") {
     if (!order) return "";
 
     const isStripe = order.payment.method === "stripe";
     const isEn = lang === "en";
+    const isSample = order.isSample === true;
 
-    const paymentStatus = isStripe 
-      ? `<span class="status-badge paid">${isEn ? "PAID (Stripe)" : "PAGADO (Stripe)"}</span>` 
-      : `<span class="status-badge pending">${isEn ? "PENDING (Transfer)" : "PENDIENTE (Transferencia)"}</span>`;
+    let paymentStatus = "";
+    if (isSample) {
+      paymentStatus = `<span class="status-badge paid" style="background: rgba(197, 168, 128, 0.1); color: #c5a880; border: 1px solid #c5a880;">${isEn ? "FREE SAMPLE" : "MUESTRA GRATUITA"}</span>`;
+    } else {
+      paymentStatus = isStripe 
+        ? `<span class="status-badge paid">${isEn ? "PAID (Stripe)" : "PAGADO (Stripe)"}</span>` 
+        : `<span class="status-badge pending">${isEn ? "PENDING (Transfer)" : "PENDIENTE (Transferencia)"}</span>`;
+    }
+
+    const docTitle = isSample 
+      ? (isEn ? "DELIVERY SLIP (SAMPLES)" : "ALBARÁN DE ENTREGA (MUESTRAS)")
+      : (isEn ? "B2B INVOICE" : "FACTURA B2B");
+
+    const numberLabel = isSample ? (isEn ? "Slip No:" : "Albarán Nº:") : (isEn ? "Invoice No:" : "Factura Nº:");
+    const numberVal = isSample 
+      ? `ALB-${order.orderId.split("-")[1] || order.orderId}`
+      : `INV-${order.orderId.split("-")[1] || order.orderId}`;
+
+    const qtyHeader = isSample ? (isEn ? "Qty (Pieces)" : "Cant. (Unidades)") : (isEn ? "Qty" : "Cantidad");
+    const formatHeader = isSample ? (isEn ? "Format" : "Formato") : (isEn ? "Format / Units" : "Formato / Unidades");
+    const priceHeader = isSample ? (isEn ? "Unit Price" : "Precio Unitario") : (isEn ? "Box Price (HT)" : "Precio Caja (HT)");
+    const totalHeader = isSample ? (isEn ? "Total" : "Total") : (isEn ? "Total Net (HT)" : "Total Neto (HT)");
 
     return `
       <div class="invoice-sheet" id="printable-invoice">
@@ -30,10 +50,10 @@ export default class Invoice {
             </div>
           </div>
           <div class="invoice-title-block">
-            <h2 class="serif-title golden-text">${isEn ? "B2B INVOICE" : "FACTURA B2B"}</h2>
+            <h2 class="serif-title golden-text">${docTitle}</h2>
             <div class="invoice-meta-grid">
-              <span class="meta-label">${isEn ? "Invoice No:" : "Factura Nº:"}</span>
-              <span class="meta-val"><strong>INV-${order.orderId.split("-")[1] || order.orderId}</strong></span>
+              <span class="meta-label">${numberLabel}</span>
+              <span class="meta-val"><strong>${numberVal}</strong></span>
               <span class="meta-label">${isEn ? "Issue Date:" : "Fecha Emisión:"}</span>
               <span class="meta-val">${order.date.split(" a las")[0]}</span>
               <span class="meta-label">${isEn ? "Status:" : "Estado:"}</span>
@@ -47,7 +67,7 @@ export default class Invoice {
         <!-- Billing details -->
         <div class="invoice-billing-row">
           <div class="invoice-billing-col">
-            <h4 class="invoice-col-title">${isEn ? "Billed to (B2B Client):" : "Facturado a (Cliente B2B):"}</h4>
+            <h4 class="invoice-col-title">${isEn ? "Client Profile / Recipient:" : "Ficha de Cliente / Destinatario:"}</h4>
             <div class="billing-client-info">
               <strong>${order.billing.company}</strong><br>
               CIF / NIF: ${order.billing.cif}<br>
@@ -72,25 +92,31 @@ export default class Invoice {
           <thead>
             <tr>
               <th>${isEn ? "Gourmet Product Description" : "Descripción del Producto (Gourmet)"}</th>
-              <th class="text-center">${isEn ? "Format / Units" : "Formato / Unidades"}</th>
-              <th class="text-right">${isEn ? "Box Price (HT)" : "Precio Caja (HT)"}</th>
-              <th class="text-center">${isEn ? "Qty" : "Cantidad"}</th>
-              <th class="text-right">${isEn ? "Total Net (HT)" : "Total Neto (HT)"}</th>
+              <th class="text-center">${formatHeader}</th>
+              <th class="text-right">${priceHeader}</th>
+              <th class="text-center">${qtyHeader}</th>
+              <th class="text-right">${totalHeader}</th>
             </tr>
           </thead>
           <tbody>
             ${order.items.map(item => {
               const name = isEn && item.name_en ? item.name_en : item.name;
+              const formatText = isSample 
+                ? (isEn ? "Loose units (samples)" : "Unidades sueltas (muestras)")
+                : (isEn ? `Box of ${item.units} units` : `Caja de ${item.units} uds`) + " (4.5kg)";
+              const itemPrice = isSample ? 0.00 : item.price;
+              const itemTotal = isSample ? 0.00 : (item.price * item.quantity);
+
               return `
                 <tr>
                   <td>
                     <strong>Croquetas de ${name}</strong><br>
-                    <small>${isEn ? "Premium Range - Flash-frozen ready to fry (30g/unit)" : "Gama Premium - Producto Ultracongelado listo para freír (30g/ud)"}</small>
+                    <small>${isEn ? "Premium Range - Flash-frozen ready to fry" : "Gama Premium - Producto Ultracongelado listo para freír"}</small>
                   </td>
-                  <td class="text-center">${isEn ? `Box of ${item.units} units` : `Caja de ${item.units} uds`} (4.5kg)</td>
-                  <td class="text-right">${item.price.toFixed(2)} €</td>
+                  <td class="text-center">${formatText}</td>
+                  <td class="text-right">${itemPrice.toFixed(2)} €</td>
                   <td class="text-center">${item.quantity}</td>
-                  <td class="text-right">${(item.price * item.quantity).toFixed(2)} €</td>
+                  <td class="text-right">${itemTotal.toFixed(2)} €</td>
                 </tr>
               `;
             }).join("")}
@@ -100,7 +126,12 @@ export default class Invoice {
         <!-- Summary Totals -->
         <div class="invoice-summary-row">
           <div class="invoice-payment-instructions">
-            ${isStripe ? `
+            ${isSample ? `
+              <p><strong>${isEn ? "Commercial Sample Details:" : "Detalle de Muestras Comerciales:"}</strong><br>
+              ${isEn 
+                ? "Free commercial samples sent for culinary evaluation and testing. Strictly not for resale. Value set at 0.00 € for customs/internal tracking." 
+                : "Envío gratuito de muestras comerciales para degustación y evaluación en cocina. Prohibida su venta. Valor comercial 0.00 € para control de inventario."}</p>
+            ` : isStripe ? `
               <p><strong>${isEn ? "Payment Details:" : "Detalle de Pago:"}</strong> ${isEn ? `Payment processed and verified via secure Stripe gateway. Capture completed successfully to the credit card of ${order.payment.cardHolder}.` : `Pago procesado y verificado mediante pasarela de pago seguro Stripe. Cargo realizado con éxito a la tarjeta de crédito de ${order.payment.cardHolder}.`}</p>
             ` : `
               <p><strong>${isEn ? "Bank Transfer Details:" : "Detalles de Transferencia Bancaria:"}</strong><br>
@@ -123,7 +154,7 @@ export default class Invoice {
                 <td class="text-right">${order.vat.toFixed(2)} €</td>
               </tr>
               <tr class="total-row-highlight">
-                <td><strong>${isEn ? "Total Invoice (TTC)" : "Total Factura (TTC)"}</strong></td>
+                <td><strong>${isEn ? "Total (TTC)" : "Total (TTC)"}</strong></td>
                 <td class="text-right"><strong>${order.total.toFixed(2)} €</strong></td>
               </tr>
             </table>
@@ -131,7 +162,9 @@ export default class Invoice {
         </div>
 
         <div class="invoice-footer-banner">
-          <p>${isEn ? "THANK YOU FOR YOUR BUSINESS - CROQON PREMIUM CROQUETAS" : "GRACIAS POR SU CONFIANZA COMERCIAL - CROQON PREMIUM CROQUETAS"}</p>
+          <p>${isSample 
+            ? (isEn ? "FREE COMMERCIAL SAMPLES - LOO INVEST IMMO, S.L." : "MUESTRAS COMERCIALES GRATUITAS - LOO INVEST IMMO, S.L.")
+            : (isEn ? "THANK YOU FOR YOUR BUSINESS - LOO INVEST IMMO, S.L." : "GRACIAS POR SU CONFIANZA COMERCIAL - LOO INVEST IMMO, S.L.")}</p>
         </div>
       </div>
     `;

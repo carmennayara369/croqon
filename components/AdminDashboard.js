@@ -233,7 +233,8 @@ export default class AdminDashboard {
           <div class="widget-content">
             <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px;">
               ${this.app.getProducts().map(p => {
-                const stockVal = p.stock !== undefined ? p.stock : 100;
+                const stockVal = p.stock !== undefined ? p.stock : 0;
+                const boxesVal = Math.floor(stockVal / p.units);
                 let barColor = "#2ecc71"; // Green
                 let textColor = "#2ecc71";
                 let statusLabel = "Disponible";
@@ -242,14 +243,18 @@ export default class AdminDashboard {
                   barColor = "#e74c3c"; // Red
                   textColor = "#e74c3c";
                   statusLabel = "Agotado";
-                } else if (stockVal <= 5) {
+                } else if (boxesVal === 0) {
+                  barColor = "#e67e22"; // Orange
+                  textColor = "#e67e22";
+                  statusLabel = "Sueltas";
+                } else if (boxesVal <= 5) {
                   barColor = "#e67e22"; // Orange
                   textColor = "#e67e22";
                   statusLabel = "Stock Bajo";
                 }
 
-                // Max bar logic (assume 120 is full/max stock to visualize percentages)
-                const percent = Math.min(100, (stockVal / 120) * 100);
+                // Assume 18000 units (~120 boxes of 150) as full/max stock to visualize percentage
+                const percent = Math.min(100, (stockVal / 18000) * 100);
 
                 return `
                   <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 4px; display: flex; flex-direction: column; gap: 8px;">
@@ -257,7 +262,7 @@ export default class AdminDashboard {
                       <span style="font-weight: bold; font-size: 13px; color: var(--color-text-light); line-height: 1.2;">${p.name}</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; margin-top: 5px;">
-                      <span style="color: ${textColor}; font-weight: bold; font-size: 14px;">${stockVal} cajas</span>
+                      <span style="color: ${textColor}; font-weight: bold; font-size: 13px;">${stockVal} uds (${boxesVal} cjs)</span>
                       <span style="font-size: 11px; text-transform: uppercase; background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 3px; color: #888; border: 1px solid rgba(255,255,255,0.05);">${statusLabel}</span>
                     </div>
                     <div class="bar-outer" style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; margin-top: 5px; width: 100%;">
@@ -344,6 +349,7 @@ export default class AdminDashboard {
             <h3>Historial de Pedidos Logísticos</h3>
             <div class="card-header-actions">
               <button id="btn-admin-add-order" class="btn-text" style="color: var(--color-gold-light); font-weight: bold;">➕ Crear Pedido</button>
+              <button id="btn-admin-add-sample" class="btn-text" style="color: var(--color-gold-light); font-weight: bold; margin-left: 10px;">🎁 Crear Muestra</button>
               <button id="btn-admin-generate-demo" class="btn-text" title="Generar Pedidos de Prueba">⚡ Simular Pedidos</button>
               <button id="btn-admin-clear-all" class="btn-text text-danger" title="Borrar Historial">🗑️ Limpiar Todo</button>
             </div>
@@ -399,7 +405,13 @@ export default class AdminDashboard {
 
         <!-- Order Details Card (Right) -->
         <div class="admin-detail-card" id="admin-detail-panel">
-          ${this.selectedOrderId === "new_manual" ? this.renderManualOrderForm() : this.renderOrderDetailPanel(selectedOrder)}
+          ${this.selectedOrderId === "new_manual" 
+            ? this.renderManualOrderForm() 
+            : (this.selectedOrderId === "new_sample" 
+                ? this.renderManualSampleForm() 
+                : this.renderOrderDetailPanel(selectedOrder)
+              )
+          }
         </div>
       </div>
     `;
@@ -415,13 +427,14 @@ export default class AdminDashboard {
       `;
     }
 
-    const isPaid = order.payment.method === "stripe" || order.payment.status === "paid";
+    const isPaid = order.payment.method === "stripe" || order.payment.status === "paid" || order.isSample === true;
     const currentLogisticsStatus = order.logisticsStatus || "pending";
+    const isSample = order.isSample === true;
 
     return `
       <div class="admin-order-detail-wrap fade-in">
         <div class="detail-header">
-          <h3>Detalle Pedido #${order.orderId}</h3>
+          <h3>Detalle ${isSample ? "Envío Muestras" : "Pedido"} #${order.orderId} ${isSample ? `<span style="font-size: 11px; background: rgba(197, 168, 128, 0.2); color: var(--color-gold); padding: 3px 8px; border-radius: 3px; margin-left: 10px; font-weight: bold; border: 1px solid rgba(197, 168, 128, 0.4);">MUESTRA</span>` : ""}</h3>
           <span class="detail-time">${order.date}</span>
         </div>
 
@@ -446,16 +459,16 @@ export default class AdminDashboard {
             <thead>
               <tr>
                 <th>Sabor</th>
-                <th class="text-center">Cajas</th>
+                <th class="text-center">${isSample ? "Unidades sueltas" : "Cajas"}</th>
                 <th class="text-right">Total HT</th>
               </tr>
             </thead>
             <tbody>
               ${order.items.map(item => `
                 <tr>
-                  <td>Croquetas de ${item.name} <small>(150 uds)</small></td>
+                  <td>Croquetas de ${item.name} <small>(${isSample ? "Degustación" : `${item.units} uds`})</small></td>
                   <td class="text-center"><strong>${item.quantity}</strong></td>
-                  <td class="text-right">${(item.price * item.quantity).toFixed(2)} €</td>
+                  <td class="text-right">${isSample ? "0.00 €" : `${(item.price * item.quantity).toFixed(2)} €`}</td>
                 </tr>
               `).join("")}
               <tr class="detail-totals-tr">
@@ -478,7 +491,11 @@ export default class AdminDashboard {
         <div class="detail-actions-box">
           <h4>Gestión Administrativa y Financiera</h4>
           <div class="action-btn-row">
-            ${!isPaid ? `
+            ${isSample ? `
+              <div class="info-success-box" style="background: rgba(197, 168, 128, 0.08); color: var(--color-gold); border-color: rgba(197, 168, 128, 0.2);">
+                🎁 Muestra comercial sin cargo económico (0.00 €).
+              </div>
+            ` : (!isPaid ? `
               <button class="btn-primary btn-block btn-small" id="btn-admin-approve-payment" data-id="${order.orderId}">
                 <span>✓ Validar Transferencia Recibida</span>
               </button>
@@ -486,7 +503,7 @@ export default class AdminDashboard {
               <div class="info-success-box">
                 ✅ Transacción validada y cobrada con éxito.
               </div>
-            `}
+            `)}
           </div>
         </div>
 
@@ -510,7 +527,7 @@ export default class AdminDashboard {
             <span>🖨️ Albarán</span>
           </button>
           <button class="btn-primary btn-small" id="btn-admin-print-invoice" data-id="${order.orderId}">
-            <span>📄 Factura B2B</span>
+            <span>${isSample ? "📄 Albarán Muestra" : "📄 Factura B2B"}</span>
           </button>
           <button class="btn-text text-danger btn-small" id="btn-admin-delete-order" data-id="${order.orderId}" style="margin-left: auto;">
             <span>Eliminar</span>
@@ -677,6 +694,124 @@ export default class AdminDashboard {
     `;
   }
 
+  renderManualSampleForm() {
+    const clients = this.app.getClients();
+    const products = this.app.getProducts();
+    const nextDays = this.getNextDeliveryDays();
+
+    return `
+      <div class="admin-order-detail-wrap fade-in" style="max-height: 80vh; overflow-y: auto; padding-right: 8px;">
+        <div class="detail-header" style="margin-bottom: 20px;">
+          <h3>Registrar Envío de Muestras B2B</h3>
+          <span class="detail-time" style="color: var(--color-gold);">Degustación sin Cargo (0 €)</span>
+        </div>
+
+        <form id="admin-manual-sample-form" class="gateway-form" style="padding: 0; background: transparent; border: none; box-shadow: none;">
+          <div class="form-group">
+            <label for="manual-sample-client-select" style="color: var(--color-gold-light); font-weight: bold;">Establecimiento Destinatario *</label>
+            <select id="manual-sample-client-select" style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: var(--color-text-light); width: 100%; padding: 10px; border-radius: 4px;">
+              <option value="">-- Cliente Personalizado / Nuevo --</option>
+              ${clients.map(c => `<option value="${c.cif}">${c.name} (${c.cif})</option>`).join("")}
+            </select>
+          </div>
+
+          <!-- Client details fields -->
+          <div id="manual-sample-client-fields" style="display: flex; flex-direction: column; gap: 12px; margin-top: 15px; border-top: 1px dashed rgba(255,255,255,0.05); padding-top: 15px;">
+            <div class="form-group">
+              <label for="manual-sample-company-name">Nombre / Razón Social Comercial *</label>
+              <input type="text" id="manual-sample-company-name" required placeholder="Ej: Gastrobar La Marea Marbella S.L.">
+            </div>
+            <div class="form-row" style="display: flex; gap: 15px;">
+              <div class="form-group" style="flex: 1;">
+                <label for="manual-sample-cif">CIF / NIF *</label>
+                <input type="text" id="manual-sample-cif" required placeholder="Ej: B93848201">
+              </div>
+              <div class="form-group" style="flex: 1;">
+                <label for="manual-sample-contact">Chef / Responsable Compras *</label>
+                <input type="text" id="manual-sample-contact" required placeholder="Ej: Chef Carlos Martínez">
+              </div>
+            </div>
+            <div class="form-row" style="display: flex; gap: 15px;">
+              <div class="form-group" style="flex: 1;">
+                <label for="manual-sample-phone">Teléfono de Cocina *</label>
+                <input type="tel" id="manual-sample-phone" required placeholder="Ej: +34 654 987 321">
+              </div>
+              <div class="form-group" style="flex: 2;">
+                <label for="manual-sample-email">Email Notificaciones B2B *</label>
+                <input type="email" id="manual-sample-email" required placeholder="Ej: compras@lamareamarbella.com">
+              </div>
+            </div>
+          </div>
+
+          <!-- Logistics fields -->
+          <div style="margin-top: 20px; border-top: 1px dashed rgba(255,255,255,0.05); padding-top: 15px; display: flex; flex-direction: column; gap: 12px;">
+            <div class="form-group">
+              <label for="manual-sample-address">Dirección de Reparto (Establecimiento) *</label>
+              <input type="text" id="manual-sample-address" required placeholder="Ej: Avenida Bulevar Príncipe Alfonso de Hohenlohe, S/N">
+            </div>
+            <div class="form-row" style="display: flex; gap: 15px;">
+              <div class="form-group" style="flex: 2;">
+                <label for="manual-sample-city">Ciudad (Málaga / Costa del Sol) *</label>
+                <select id="manual-sample-city" required style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: var(--color-text-light); width: 100%; padding: 10px; border-radius: 4px;">
+                  <option value="marbella">Marbella</option>
+                  <option value="malaga">Málaga Centro</option>
+                  <option value="estepona">Estepona</option>
+                  <option value="fuengirola">Fuengirola</option>
+                  <option value="torremolinos">Torremolinos</option>
+                  <option value="benalmadena">Benalmádena</option>
+                </select>
+              </div>
+              <div class="form-group" style="flex: 1;">
+                <label for="manual-sample-postal">Código Postal *</label>
+                <input type="text" id="manual-sample-postal" required placeholder="29602" pattern="^[0-9]{5}$">
+              </div>
+            </div>
+
+            <div class="form-row" style="display: flex; gap: 15px;">
+              <div class="form-group" style="flex: 2;">
+                <label for="manual-sample-delivery-date">Fecha de Reparto Programada *</label>
+                <select id="manual-sample-delivery-date" required style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: var(--color-text-light); width: 100%; padding: 10px; border-radius: 4px;">
+                  <option value="${nextDays[0].iso}">${nextDays[0].formatted} (Logística Martes)</option>
+                  <option value="${nextDays[1].iso}">${nextDays[1].formatted} (Logística Viernes)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Product quantities section -->
+          <div class="detail-section-box" style="margin-top: 20px;">
+            <h4 style="margin-bottom: 12px; color: var(--color-gold-light);">Muestras de Degustación (Unidades sueltas / piezas)</h4>
+            <div class="manual-products-list" style="display: flex; flex-direction: column; gap: 12px;">
+              ${products.map(p => {
+                const name = this.app.lang === "en" && p.name_en ? p.name_en : p.name;
+                return `
+                  <div class="manual-prod-row" style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 8px;">
+                    <div style="flex: 1; padding-right: 15px;">
+                      <strong style="font-size: 13px; color: var(--color-text-light);">${name}</strong><br>
+                      <small style="color: var(--color-text-muted); font-size: 11px;">Stock disponible: <strong>${p.stock} uds</strong> | 0.00 € (Muestra)</small>
+                    </div>
+                    <div style="width: 80px;">
+                      <input type="number" class="manual-sample-qty-input" data-prod-id="${p.id}" value="0" min="0" max="${p.stock}" style="text-align: center; font-weight: bold; width: 100%; padding: 6px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: var(--color-text-light); border-radius: 4px;">
+                    </div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          </div>
+
+          <div style="margin-top: 25px; display: flex; gap: 15px;">
+            <button type="submit" class="btn-primary" style="flex: 1;">
+              <span>Registrar Envío de Muestra</span>
+            </button>
+            <button type="button" class="btn-secondary" id="btn-admin-cancel-sample-creation" style="flex: 1;">
+              <span>Cancelar</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    `;
+  }
+
   /* ====================================================
      TAB 2: PRODUCTS EDITOR
      ==================================================== */
@@ -709,15 +844,22 @@ export default class AdminDashboard {
               </thead>
               <tbody>
                 ${products.map(p => {
-                  const stockVal = p.stock !== undefined ? p.stock : 100;
+                  const stockUnits = p.stock !== undefined ? p.stock : 0;
+                  const boxesVal = Math.floor(stockUnits / p.units);
+                  
                   let stockStyle = "color: #2ecc71; font-weight: bold;"; // Green for sufficient stock
-                  let stockText = `${stockVal} cajas`;
-                  if (stockVal === 0) {
+                  let stockText = `${stockUnits} uds (${boxesVal} cjs)`;
+                  
+                  if (stockUnits === 0) {
                     stockStyle = "color: #e74c3c; font-weight: bold; background: rgba(231, 76, 60, 0.1); padding: 2px 6px; border-radius: 3px;";
                     stockText = "Agotado";
-                  } else if (stockVal <= 5) {
+                  } else if (boxesVal === 0) {
+                    // There is stock in pieces but not enough to fill a full box!
                     stockStyle = "color: #e67e22; font-weight: bold; background: rgba(230, 126, 34, 0.1); padding: 2px 6px; border-radius: 3px;";
-                    stockText = `${stockVal} (Bajo)`;
+                    stockText = `${stockUnits} uds (Sueltas)`;
+                  } else if (boxesVal <= 5) {
+                    stockStyle = "color: #e67e22; font-weight: bold; background: rgba(230, 126, 34, 0.1); padding: 2px 6px; border-radius: 3px;";
+                    stockText = `${stockUnits} uds (Bajo)`;
                   }
                   return `
                     <tr class="admin-product-row ${p.id === this.selectedProductId ? "selected" : ""}" data-prod-id="${p.id}">
@@ -801,8 +943,8 @@ export default class AdminDashboard {
               <input type="number" id="edit-prod-weight" required value="${p.weight}">
             </div>
             <div class="form-group" style="flex: 1;">
-              <label for="edit-prod-stock">Stock Disponible (Cajas) *</label>
-              <input type="number" id="edit-prod-stock" required value="${p.stock !== undefined ? p.stock : 100}">
+              <label for="edit-prod-stock">Stock Disponible (Unidades de Croqueta) *</label>
+              <input type="number" id="edit-prod-stock" required value="${p.stock !== undefined ? p.stock : 15000}">
             </div>
           </div>
 
@@ -1399,9 +1541,9 @@ export default class AdminDashboard {
             if (quantity > 0) {
               const prod = products.find(p => p.id === prodId);
               if (prod) {
-                const maxStock = prod.stock !== undefined ? prod.stock : 100;
-                if (quantity > maxStock) {
-                  stockError = `No hay suficiente stock para: ${prod.name}. Stock disponible: ${maxStock} cajas.`;
+                const maxBoxes = Math.floor(prod.stock / prod.units);
+                if (quantity > maxBoxes) {
+                  stockError = `No hay suficiente stock para: ${prod.name}. Stock disponible: ${maxBoxes} cajas.`;
                 }
                 orderItems.push({
                   id: prod.id,
@@ -1483,7 +1625,7 @@ export default class AdminDashboard {
           orderItems.forEach(orderItem => {
             const prod = products.find(p => p.id === orderItem.id);
             if (prod) {
-              prod.stock = Math.max(0, (prod.stock !== undefined ? prod.stock : 100) - orderItem.quantity);
+              prod.stock = Math.max(0, (prod.stock !== undefined ? prod.stock : 0) - (orderItem.quantity * prod.units));
             }
           });
           this.app.saveProducts(products); // Syncs to server immediately!
@@ -1492,6 +1634,186 @@ export default class AdminDashboard {
           alert(this.app.lang === "en" 
             ? "Manual B2B order successfully created and synced!" 
             : "¡Pedido B2B manual creado y sincronizado con éxito!");
+          this.render();
+        });
+      }
+
+      // Add sample button click listener
+      const addSampleBtn = document.getElementById("btn-admin-add-sample");
+      if (addSampleBtn) {
+        addSampleBtn.addEventListener("click", () => {
+          this.selectedOrderId = "new_sample";
+          this.render();
+        });
+      }
+
+      // Cancel sample button click listener
+      const cancelSampleBtn = document.getElementById("btn-admin-cancel-sample-creation");
+      if (cancelSampleBtn) {
+        cancelSampleBtn.addEventListener("click", () => {
+          this.selectedOrderId = null;
+          this.render();
+        });
+      }
+
+      // Sample Client dropdown auto-fill logic
+      const sampleClientSelect = document.getElementById("manual-sample-client-select");
+      if (sampleClientSelect) {
+        sampleClientSelect.addEventListener("change", (e) => {
+          const cifVal = e.target.value;
+          const compInput = document.getElementById("manual-sample-company-name");
+          const cifInput = document.getElementById("manual-sample-cif");
+          const contactInput = document.getElementById("manual-sample-contact");
+          const phoneInput = document.getElementById("manual-sample-phone");
+          const emailInput = document.getElementById("manual-sample-email");
+          const addressInput = document.getElementById("manual-sample-address");
+          const cityInput = document.getElementById("manual-sample-city");
+          const postalInput = document.getElementById("manual-sample-postal");
+
+          if (!cifVal) {
+            if (compInput) compInput.value = "";
+            if (cifInput) cifInput.value = "";
+            if (contactInput) contactInput.value = "";
+            if (phoneInput) phoneInput.value = "";
+            if (emailInput) emailInput.value = "";
+            if (addressInput) addressInput.value = "";
+            if (postalInput) postalInput.value = "";
+          } else {
+            const clients = this.app.getClients();
+            const client = clients.find(c => c.cif === cifVal);
+            if (client) {
+              if (compInput) compInput.value = client.name;
+              if (cifInput) cifInput.value = client.cif;
+              if (contactInput) contactInput.value = client.contact;
+              if (phoneInput) phoneInput.value = client.phone;
+              if (emailInput) emailInput.value = client.email;
+              
+              // If it's a known client (La Marea), auto-fill shipping details
+              if (client.cif === "B93848201" || client.cif === "B93848201") {
+                if (addressInput) addressInput.value = "Avenida del Mar, 4";
+                if (cityInput) cityInput.value = "marbella";
+                if (postalInput) postalInput.value = "29602";
+              } else {
+                if (addressInput) addressInput.value = "";
+                if (postalInput) postalInput.value = "";
+              }
+            }
+          }
+        });
+      }
+
+      // Manual sample form submit handler
+      const manualSampleForm = document.getElementById("admin-manual-sample-form");
+      if (manualSampleForm) {
+        manualSampleForm.addEventListener("submit", (e) => {
+          e.preventDefault();
+
+          const companyName = document.getElementById("manual-sample-company-name").value;
+          const cif = document.getElementById("manual-sample-cif").value;
+          const contact = document.getElementById("manual-sample-contact").value;
+          const phone = document.getElementById("manual-sample-phone").value;
+          const email = document.getElementById("manual-sample-email").value;
+          const address = document.getElementById("manual-sample-address").value;
+          const city = document.getElementById("manual-sample-city").value;
+          const postal = document.getElementById("manual-sample-postal").value;
+
+          const deliveryDateSelect = document.getElementById("manual-sample-delivery-date");
+          const deliveryDateStr = deliveryDateSelect.options[deliveryDateSelect.selectedIndex].text;
+          const deliveryDateIso = deliveryDateSelect.value;
+
+          // Gather quantities (in loose units)
+          const orderItems = [];
+          let totalPieces = 0;
+          const products = this.app.getProducts();
+          let stockError = null;
+
+          document.querySelectorAll(".manual-sample-qty-input").forEach(input => {
+            const prodId = input.dataset.prodId;
+            const quantity = parseInt(input.value) || 0;
+            if (quantity > 0) {
+              const prod = products.find(p => p.id === prodId);
+              if (prod) {
+                if (quantity > prod.stock) {
+                  stockError = `No hay suficiente stock para: ${prod.name}. Stock disponible: ${prod.stock} uds sueltas.`;
+                }
+                orderItems.push({
+                  id: prod.id,
+                  name: prod.name,
+                  name_en: prod.name_en || prod.name,
+                  price: 0, // Samples are free
+                  units: prod.units,
+                  quantity: quantity
+                });
+                totalPieces += quantity;
+              }
+            }
+          });
+
+          // Stock level validation check
+          if (stockError) {
+            alert(stockError);
+            return;
+          }
+
+          // Validation
+          if (totalPieces < 1) {
+            alert("Debe seleccionar al menos 1 unidad de croqueta para enviar muestras.");
+            return;
+          }
+
+          // Generate sample order ID (prefixed with CRQ-S)
+          const orderId = "CRQ-S-" + Math.floor(100000 + Math.random() * 90000);
+
+          const orderObj = {
+            orderId: orderId,
+            isSample: true,
+            date: new Date().toLocaleDateString(this.app.lang === "en" ? "en-US" : "es-ES", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }),
+            user: {
+              name: companyName,
+              cif: cif,
+              contact: contact,
+              phone: phone,
+              email: email,
+              sector: "restaurant"
+            },
+            delivery: {
+              address: address,
+              city: city,
+              postal: postal,
+              dateStr: deliveryDateStr,
+            },
+            billing: {
+              company: companyName,
+              address: address,
+              cif: cif
+            },
+            payment: {
+              method: "sample",
+              status: "paid",
+              cardHolder: null
+            },
+            items: orderItems,
+            subtotal: 0,
+            vat: 0,
+            total: 0,
+            logisticsStatus: "pending"
+          };
+
+          const orders = this.getOrders();
+          orders.push(orderObj);
+          this.saveOrders(orders);
+
+          // Deduct stock for sample items directly (loose units)
+          orderItems.forEach(orderItem => {
+            const prod = products.find(p => p.id === orderItem.id);
+            if (prod) {
+              prod.stock = Math.max(0, (prod.stock !== undefined ? prod.stock : 0) - orderItem.quantity);
+            }
+          });
+          this.app.saveProducts(products); // Syncs to server immediately!
+
+          this.selectedOrderId = orderId;
+          alert("¡Registro de envío de muestras guardado y sincronizado con éxito (Albarán a 0 €)!");
           this.render();
         });
       }
