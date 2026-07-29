@@ -670,10 +670,10 @@ export default class AdminDashboard {
                   <div class="manual-prod-row" style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 8px;">
                     <div style="flex: 1; padding-right: 15px;">
                       <strong style="font-size: 13px; color: var(--color-text-light);">${name}</strong><br>
-                      <small style="color: var(--color-text-muted); font-size: 11px;">Caja de ${p.units} uds | ${p.price.toFixed(2)} €/caja HT</small>
+                      <small style="color: var(--color-text-muted); font-size: 11px;">Caja de ${p.units} uds | ${p.price.toFixed(2)} €/caja HT | Stock: <strong>${Math.floor(p.stock / p.units)} cjs</strong></small>
                     </div>
                     <div style="width: 80px;">
-                      <input type="number" class="manual-qty-input" data-prod-id="${p.id}" value="0" min="0" max="99" style="text-align: center; font-weight: bold; width: 100%; padding: 6px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: var(--color-text-light); border-radius: 4px;">
+                      <input type="number" class="manual-qty-input" data-prod-id="${p.id}" value="0" min="0" max="${Math.floor(p.stock / p.units)}" style="text-align: center; font-weight: bold; width: 100%; padding: 6px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: var(--color-text-light); border-radius: 4px;">
                     </div>
                   </div>
                 `;
