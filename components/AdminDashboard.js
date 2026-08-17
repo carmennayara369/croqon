@@ -25,6 +25,12 @@ export default class AdminDashboard {
   saveOrders(orders) {
     try {
       localStorage.setItem("croqon_b2b_orders", JSON.stringify(orders));
+      // Sync with Plesk server database
+      fetch("api.php?action=save_orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orders)
+      }).catch(err => console.error("Failed to sync orders with server", err));
     } catch (e) {
       console.error("Failed to save orders", e);
     }
