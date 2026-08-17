@@ -34,6 +34,15 @@ switch ($action) {
     case 'save_orders':
         $data = file_get_contents('php://input');
         if (json_decode($data) !== null) {
+            // Roll backups: backup existing file if it exists and is not empty
+            if (file_exists($orders_file) && filesize($orders_file) > 0) {
+                for ($i = 4; $i >= 1; $i--) {
+                    if (file_exists($store_dir . "/orders_bak{$i}.json")) {
+                        rename($store_dir . "/orders_bak{$i}.json", $store_dir . "/orders_bak" . ($i + 1) . ".json");
+                    }
+                }
+                copy($orders_file, $store_dir . '/orders_bak1.json');
+            }
             file_put_contents($orders_file, $data);
             echo json_encode(['status' => 'success']);
         } else {
@@ -53,6 +62,15 @@ switch ($action) {
     case 'save_products':
         $data = file_get_contents('php://input');
         if (json_decode($data) !== null) {
+            // Roll backups: backup existing file if it exists and is not empty
+            if (file_exists($products_file) && filesize($products_file) > 0) {
+                for ($i = 4; $i >= 1; $i--) {
+                    if (file_exists($store_dir . "/products_bak{$i}.json")) {
+                        rename($store_dir . "/products_bak{$i}.json", $store_dir . "/products_bak" . ($i + 1) . ".json");
+                    }
+                }
+                copy($products_file, $store_dir . '/products_bak1.json');
+            }
             file_put_contents($products_file, $data);
             echo json_encode(['status' => 'success']);
         } else {
@@ -72,6 +90,15 @@ switch ($action) {
     case 'save_clients':
         $data = file_get_contents('php://input');
         if (json_decode($data) !== null) {
+            // Roll backups: backup existing file if it exists and is not empty
+            if (file_exists($clients_file) && filesize($clients_file) > 0) {
+                for ($i = 4; $i >= 1; $i--) {
+                    if (file_exists($store_dir . "/clients_bak{$i}.json")) {
+                        rename($store_dir . "/clients_bak{$i}.json", $store_dir . "/clients_bak" . ($i + 1) . ".json");
+                    }
+                }
+                copy($clients_file, $store_dir . '/clients_bak1.json');
+            }
             file_put_contents($clients_file, $data);
             echo json_encode(['status' => 'success']);
         } else {

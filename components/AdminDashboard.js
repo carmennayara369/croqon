@@ -351,7 +351,6 @@ export default class AdminDashboard {
               <button id="btn-admin-add-order" class="btn-text" style="color: var(--color-gold-light); font-weight: bold;">➕ Crear Pedido</button>
               <button id="btn-admin-add-sample" class="btn-text" style="color: var(--color-gold-light); font-weight: bold; margin-left: 10px;">🎁 Crear Muestra</button>
               <button id="btn-admin-generate-demo" class="btn-text" title="Generar Pedidos de Prueba">⚡ Simular Pedidos</button>
-              <button id="btn-admin-clear-all" class="btn-text text-danger" title="Borrar Historial">🗑️ Limpiar Todo</button>
             </div>
           </div>
 
@@ -1371,17 +1370,6 @@ export default class AdminDashboard {
         });
       });
 
-      // Clear all orders
-      const clearBtn = document.getElementById("btn-admin-clear-all");
-      if (clearBtn) {
-        clearBtn.addEventListener("click", () => {
-          if (confirm("¿Está seguro de que desea eliminar todos los pedidos de la base de datos?")) {
-            this.saveOrders([]);
-            this.selectedOrderId = null;
-            this.render();
-          }
-        });
-      }
 
       // Generate demo orders
       const generateBtn = document.getElementById("btn-admin-generate-demo");
