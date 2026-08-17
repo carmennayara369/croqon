@@ -172,9 +172,30 @@ class App {
       // Fetch orders
       const resOrders = await fetch("api.php?action=get_orders");
       if (resOrders.ok) {
-        const orders = await resOrders.json();
-        if (orders) {
-          localStorage.setItem("croqon_b2b_orders", JSON.stringify(orders));
+        const serverOrders = await resOrders.json();
+        const localOrdersStr = localStorage.getItem("croqon_b2b_orders");
+        let localOrders = [];
+        try {
+          localOrders = localOrdersStr ? JSON.parse(localOrdersStr) : [];
+        } catch (e) {
+          localOrders = [];
+        }
+
+        if (serverOrders && serverOrders.length > 0) {
+          // Server has orders, overwrite local cache as normal
+          localStorage.setItem("croqon_b2b_orders", JSON.stringify(serverOrders));
+        } else if (localOrders && localOrders.length > 0) {
+          // Server database is empty but client has local cache!
+          // Auto-heal the server database by uploading local orders
+          console.log("Self-healing: restoring server orders database from local cache");
+          await fetch("api.php?action=save_orders", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(localOrders)
+          });
+        } else {
+          // Both are empty
+          localStorage.setItem("croqon_b2b_orders", JSON.stringify([]));
         }
       }
     } catch (e) {
