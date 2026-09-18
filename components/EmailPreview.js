@@ -49,7 +49,7 @@ export default class EmailPreview {
                   const name = isEn && item.name_en ? item.name_en : item.name;
                   return `
                     <tr style="border-bottom: 1px solid #eae3d2;">
-                      <td style="padding: 10px; font-size: 14px;"><strong>${name}</strong><br><span style="font-size: 12px; color: #666;">${isEn ? `Box of ${item.units} units` : `Caja de ${item.units} uds`} (4.5kg net)</span></td>
+                      <td style="padding: 10px; font-size: 14px;"><strong>${name}</strong><br><span style="font-size: 12px; color: #666;">${isEn ? `Box of ${item.units} units` : `Caja de ${item.units} uds`}</span></td>
                       <td style="padding: 10px; text-align: center; font-size: 14px;">${item.quantity}</td>
                       <td style="padding: 10px; text-align: right; font-size: 14px;">${(item.price * item.quantity).toFixed(2)} €</td>
                     </tr>
@@ -75,7 +75,7 @@ export default class EmailPreview {
               💳 <strong>${isEn ? "Credit Card via Stripe:" : "Tarjeta de Crédito via Stripe:"}</strong> ${isEn ? "The transaction has been successfully processed and verified via our Stripe gateway. A digital invoice is attached below." : "El pago se ha completado correctamente a través de nuestra pasarela cifrada de Stripe. Se adjunta el recibo digital de cobro comercial."}
             ` : `
               🏦 <strong>${isEn ? "Direct Bank Transfer:" : "Transferencia Bancaria Directa:"}</strong> ${isEn ? `Please notice that your refrigerated truck loading slot remains pending until we receive the transfer proof for <strong>${order.total.toFixed(2)} €</strong>.` : `Le recordamos que su pedido queda reservado pero no será cargado en el transporte refrigerado hasta que recibamos el justificante de la transferencia bancaria por valor de <strong>${order.total.toFixed(2)} €</strong>.`}<br>
-              <strong>${isEn ? "Bank:" : "Banco:"}</strong> Banco Santander | <strong>IBAN:</strong> ES48 3058 0776 8127 2004 3134<br>
+              <strong>${isEn ? "Bank:" : "Banco:"}</strong> Banco Santander | <strong>IBAN:</strong> ES19 3058 0776 8327 2005 8884<br>
               <strong>${isEn ? "Reference:" : "Concepto:"}</strong> PEDIDO PRO #${order.orderId}
             `}</p>
 

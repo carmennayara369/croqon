@@ -195,7 +195,7 @@ export const translations = {
     inv_table_qty: "Qty",
     inv_table_total: "Total Net (HT)",
     inv_desc_detail: "Premium Range - Flash-frozen ready to fry (30g/ud)",
-    inv_desc_format: "Box of {units} units (4.5kg net)",
+    inv_desc_format: "Box of {units} units",
     inv_pay_detail_stripe: "Payment Details: Payment verified and captured via secure Stripe gateway.",
     inv_pay_detail_transfer: "Bank Transfer Details: Please send the bank transfer proof to logistica@croqon.com.",
     inv_footer_terms: "Store at -18°C. Do not refreeze after thawing. Fry at 180°C for 3-4 minutes.",

@@ -164,7 +164,7 @@ export default class Checkout {
                 <div class="bank-info-box">
                   <div class="bank-row"><span>${this.app.t("chk_transfer_bank", "Banco:")}</span><strong>Banco Santander</strong></div>
                   <div class="bank-row"><span>${this.app.t("chk_transfer_beneficiary", "Beneficiario:")}</span><strong>Loo Invest Immo, S.L.</strong></div>
-                  <div class="bank-row"><span>IBAN:</span><strong>ES48 3058 0776 8127 2004 3134</strong></div>
+                  <div class="bank-row"><span>IBAN:</span><strong>ES19 3058 0776 8327 2005 8884</strong></div>
                   <div class="bank-row"><span>${this.app.t("chk_transfer_concept", "Concepto:")}</span><strong>PEDIDO PRO - <span id="mock-concept-id">...</span></strong></div>
                 </div>
                 <p class="warning-text">${this.app.t("chk_transfer_warning", "Importante: El pedido no será cargado en el transporte refrigerado hasta que recibamos el justificante bancario en logistica@croqon.com.")}</p>

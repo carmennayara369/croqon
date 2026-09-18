@@ -103,7 +103,7 @@ export default class Invoice {
               const name = isEn && item.name_en ? item.name_en : item.name;
               const formatText = isSample 
                 ? (isEn ? "Loose units (samples)" : "Unidades sueltas (muestras)")
-                : (isEn ? `Box of ${item.units} units` : `Caja de ${item.units} uds`) + " (4.5kg)";
+                : (isEn ? `Box of ${item.units} units` : `Caja de ${item.units} uds`);
               const itemPrice = isSample ? 0.00 : item.price;
               const itemTotal = isSample ? 0.00 : (item.price * item.quantity);
 
@@ -136,7 +136,7 @@ export default class Invoice {
             ` : `
               <p><strong>${isEn ? "Bank Transfer Details:" : "Detalles de Transferencia Bancaria:"}</strong><br>
               ${isEn ? "Please make the bank transfer using the following details:" : "Por favor, efectúe el pago a la cuenta del Banco Santander:"} <br>
-              <strong>ES48 3058 0776 8127 2004 3134</strong><br>
+              <strong>ES19 3058 0776 8327 2005 8884</strong><br>
               ${isEn ? "Reference:" : "Concepto:"} <strong>FACTURA INV-${order.orderId.split("-")[1] || order.orderId}</strong><br>
               ${isEn ? "Please send the bank transfer proof to logistica@croqon.com to release your cold-truck loading slot." : "Envíe el justificante de transferencia bancaria a logistica@croqon.com para programar la carga en el camión refrigerado."}</p>
             `}

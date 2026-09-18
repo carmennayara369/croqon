@@ -702,7 +702,7 @@ export default class AdminDashboard {
   renderManualSampleForm() {
     const clients = this.app.getClients();
     const products = this.app.getProducts();
-    const nextDays = this.getNextDeliveryDays();
+    const todayIso = new Date().toISOString().split("T")[0];
 
     return `
       <div class="admin-order-detail-wrap fade-in" style="max-height: 80vh; overflow-y: auto; padding-right: 8px;">
@@ -774,11 +774,8 @@ export default class AdminDashboard {
 
             <div class="form-row" style="display: flex; gap: 15px;">
               <div class="form-group" style="flex: 2;">
-                <label for="manual-sample-delivery-date">Fecha de Reparto Programada *</label>
-                <select id="manual-sample-delivery-date" required style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: var(--color-text-light); width: 100%; padding: 10px; border-radius: 4px;">
-                  <option value="${nextDays[0].iso}">${nextDays[0].formatted} (Logística Martes)</option>
-                  <option value="${nextDays[1].iso}">${nextDays[1].formatted} (Logística Viernes)</option>
-                </select>
+                <label for="manual-sample-delivery-date">Fecha de Reparto Deseada (Libre) *</label>
+                <input type="date" id="manual-sample-delivery-date" required value="${todayIso}" style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: var(--color-text-light); width: 100%; padding: 10px; border-radius: 4px; color-scheme: dark;">
               </div>
             </div>
           </div>
@@ -1711,9 +1708,22 @@ export default class AdminDashboard {
           const city = document.getElementById("manual-sample-city").value;
           const postal = document.getElementById("manual-sample-postal").value;
 
-          const deliveryDateSelect = document.getElementById("manual-sample-delivery-date");
-          const deliveryDateStr = deliveryDateSelect.options[deliveryDateSelect.selectedIndex].text;
-          const deliveryDateIso = deliveryDateSelect.value;
+          const deliveryDateInput = document.getElementById("manual-sample-delivery-date");
+          const deliveryDateIso = deliveryDateInput ? deliveryDateInput.value : "";
+          let deliveryDateStr = deliveryDateIso;
+          if (deliveryDateIso) {
+            const [y, m, d] = deliveryDateIso.split("-");
+            if (y && m && d) {
+              const dateObj = new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
+              deliveryDateStr = dateObj.toLocaleDateString(this.app.lang === "en" ? "en-US" : "es-ES", {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+                year: "numeric"
+              });
+              deliveryDateStr = deliveryDateStr.charAt(0).toUpperCase() + deliveryDateStr.slice(1);
+            }
+          }
 
           // Gather quantities (in loose units)
           const orderItems = [];
