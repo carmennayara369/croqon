@@ -114,22 +114,61 @@ class App {
   getClients() {
     try {
       let stored = localStorage.getItem("croqon_b2b_clients");
+      const defaultClients = [
+        {
+          name: "Restaurante La Marea Marbella S.L.",
+          cif: "B93848201",
+          contact: "Chef Carlos Martínez",
+          phone: "+34 654 987 321",
+          email: "compras@lamareamarbella.com",
+          address: "Avenida del Mar, 4",
+          city: "marbella",
+          postal: "29602",
+          sector: "beach-club",
+          pin: "1234"
+        },
+        {
+          name: "La Tabla Belga",
+          cif: "B19846187",
+          contact: "Sylvie (Chef / Compras)",
+          phone: "+34640125685",
+          email: "latablabelga@gmail.com",
+          address: "Centro comercial Los Pinare",
+          city: "marbella",
+          postal: "29604",
+          sector: "restaurant",
+          pin: "1234"
+        },
+        {
+          name: "Mariposario Melsens SL",
+          cif: "B19433648",
+          contact: "Pascal Melsens (Chef / Compras)",
+          phone: "+32496565606",
+          email: "pascal_melsens@hotmail.com",
+          address: "C. Muérdago s/n",
+          city: "benalmadena",
+          postal: "29639",
+          sector: "restaurant",
+          pin: "1234"
+        }
+      ];
+
       if (!stored) {
-        const defaultClients = [
-          {
-            name: "Restaurante La Marea Marbella S.L.",
-            cif: "B93848201",
-            contact: "Chef Carlos Martínez",
-            phone: "+34 654 987 321",
-            email: "compras@lamareamarbella.com",
-            sector: "beach-club",
-            pin: "1234"
-          }
-        ];
         localStorage.setItem("croqon_b2b_clients", JSON.stringify(defaultClients));
         return defaultClients;
       }
-      return JSON.parse(stored);
+      const parsed = JSON.parse(stored);
+      let modified = false;
+      defaultClients.forEach(dc => {
+        if (!parsed.some(c => c.cif === dc.cif)) {
+          parsed.push(dc);
+          modified = true;
+        }
+      });
+      if (modified) {
+        localStorage.setItem("croqon_b2b_clients", JSON.stringify(parsed));
+      }
+      return parsed;
     } catch (e) {
       console.error("Failed to load clients from storage", e);
       return [];

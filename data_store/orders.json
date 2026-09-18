@@ -1,0 +1,126 @@
+[
+  {
+    "orderId": "CRQ-172051",
+    "date": "29 de julio de 2026 a las 23:05",
+    "user": {
+      "name": "Mariposario Melsens SL",
+      "cif": "B19433648",
+      "contact": "Pascal Melsens (Chef / Compras)",
+      "phone": "+32496565606",
+      "email": "pascal_melsens@hotmail.com",
+      "sector": "restaurant"
+    },
+    "delivery": {
+      "address": "C. Muérdago s/n",
+      "city": "marbella",
+      "postal": "29639",
+      "dateStr": "Vendredi 31 juillet 2026 (Logistique mardi)"
+    },
+    "billing": {
+      "company": "Mariposario Melsens SL",
+      "address": "C. Muérdago s/n, 29639 Marbella / Málaga",
+      "cif": "B19433648"
+    },
+    "payment": {
+      "method": "transfer",
+      "status": "pending",
+      "cardHolder": null
+    },
+    "items": [
+      {
+        "id": "manchego-semicurado",
+        "name": "Manchego Semi-Assiné",
+        "name_en": "Semi-Cured Manchego",
+        "price": 0.9,
+        "units": 1,
+        "quantity": 100
+      },
+      {
+        "id": "chorizo-iberico",
+        "name": "Chorizo ibérique de Bellota",
+        "name_en": "Iberian Bellota Chorizo",
+        "price": 0.95,
+        "units": 1,
+        "quantity": 100
+      },
+      {
+        "id": "manchego-serrano",
+        "name": "Manchego et Serrano",
+        "name_en": "Manchego & Serrano",
+        "price": 0.95,
+        "units": 1,
+        "quantity": 100
+      },
+      {
+        "id": "jamon-iberico",
+        "name": "Jambon Ibérique de Bellota",
+        "name_en": "Iberian Bellota Ham",
+        "price": 1.25,
+        "units": 1,
+        "quantity": 100
+      },
+      {
+        "id": "camaron-gris-30g",
+        "name": "Crevettes grises (Crevettes grises) 30g",
+        "name_en": "Grey Shrimp (Camarón Gris) 30g",
+        "price": 1.35,
+        "units": 1,
+        "quantity": 240
+      }
+    ],
+    "subtotal": 729,
+    "vat": 72.9,
+    "total": 801.9,
+    "logisticsStatus": "delivered"
+  },
+  {
+    "orderId": "CRQ-167661",
+    "date": "29 de julio de 2026 a las 14:37",
+    "user": {
+      "name": "La Tabla Belga",
+      "cif": "B19846187",
+      "contact": "Sylvie (Chef / Compras)",
+      "phone": "+34640125685",
+      "email": "latablabelga@gmail.com",
+      "sector": "restaurant"
+    },
+    "delivery": {
+      "address": "Centro comercial Los Pinare",
+      "city": "marbella",
+      "postal": "29604",
+      "dateStr": "Vendredi 31 juillet 2026 (Logistique mardi)"
+    },
+    "billing": {
+      "company": "La Tabla Belga",
+      "address": "Centro comercial Los Pinare, 29604 Marbella / Málaga",
+      "cif": "B19846187"
+    },
+    "payment": {
+      "method": "transfer",
+      "status": "pending",
+      "cardHolder": null
+    },
+    "items": [
+      {
+        "id": "manchego-semicurado",
+        "name": "Manchego Semi-Assiné",
+        "name_en": "Semi-Cured Manchego",
+        "price": 0.9,
+        "units": 1,
+        "quantity": 300
+      },
+      {
+        "id": "chorizo-iberico",
+        "name": "Chorizo ibérique de Bellota",
+        "name_en": "Iberian Bellota Chorizo",
+        "price": 0.95,
+        "units": 1,
+        "quantity": 300
+      }
+    ],
+    "subtotal": 555,
+    "vat": 55.5,
+    "total": 610.5,
+    "logisticsStatus": "delivered"
+  }
+]
