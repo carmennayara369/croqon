@@ -202,9 +202,33 @@ class App {
       // Fetch clients
       const resClients = await fetch("api.php?action=get_clients");
       if (resClients.ok) {
-        const clients = await resClients.json();
-        if (clients && clients.length > 0) {
-          localStorage.setItem("croqon_b2b_clients", JSON.stringify(clients));
+        const serverClients = await resClients.json();
+        const localClientsStr = localStorage.getItem("croqon_b2b_clients");
+        let localClients = [];
+        try {
+          localClients = localClientsStr ? JSON.parse(localClientsStr) : [];
+        } catch (e) {
+          localClients = [];
+        }
+        const clientMap = new Map();
+        (serverClients || []).forEach(c => {
+          if (c && c.cif) clientMap.set(c.cif, c);
+        });
+        (localClients || []).forEach(c => {
+          if (c && c.cif && !clientMap.has(c.cif)) {
+            clientMap.set(c.cif, c);
+          }
+        });
+        const allClients = Array.from(clientMap.values());
+        if (allClients.length > 0) {
+          localStorage.setItem("croqon_b2b_clients", JSON.stringify(allClients));
+          if (allClients.length > (serverClients ? serverClients.length : 0)) {
+            await fetch("api.php?action=save_clients", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(allClients)
+            });
+          }
         }
       }
 
@@ -220,21 +244,31 @@ class App {
           localOrders = [];
         }
 
-        if (serverOrders && serverOrders.length > 0) {
-          // Server has orders, overwrite local cache as normal
-          localStorage.setItem("croqon_b2b_orders", JSON.stringify(serverOrders));
-        } else if (localOrders && localOrders.length > 0) {
-          // Server database is empty but client has local cache!
-          // Auto-heal the server database by uploading local orders
-          console.log("Self-healing: restoring server orders database from local cache");
+        // Smart bi-directional merge: keep all server orders AND all local orders by orderId
+        const mergedMap = new Map();
+        (serverOrders || []).forEach(o => {
+          if (o && o.orderId) mergedMap.set(o.orderId, o);
+        });
+        (localOrders || []).forEach(o => {
+          if (o && o.orderId) {
+            // Keep local order if not already in map
+            if (!mergedMap.has(o.orderId)) {
+              mergedMap.set(o.orderId, o);
+            }
+          }
+        });
+        const allOrders = Array.from(mergedMap.values());
+        localStorage.setItem("croqon_b2b_orders", JSON.stringify(allOrders));
+
+        // If local had orders that server didn't have, sync merged list back to server immediately
+        const serverCount = serverOrders ? serverOrders.length : 0;
+        if (allOrders.length > serverCount) {
+          console.log("Syncing missing orders back to server database:", allOrders.length - serverCount);
           await fetch("api.php?action=save_orders", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(localOrders)
+            body: JSON.stringify(allOrders)
           });
-        } else {
-          // Both are empty
-          localStorage.setItem("croqon_b2b_orders", JSON.stringify([]));
         }
       }
     } catch (e) {
