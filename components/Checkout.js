@@ -27,8 +27,8 @@ export default class Checkout {
     const vat = this.app.cart.getVAT();
     const total = this.app.cart.getTotal();
 
-    // Calculate delivery options (Tuesday and Friday)
-    const nextDays = this.getNextDeliveryDays();
+    // Calculate delivery options
+    const todayIso = new Date().toISOString().split("T")[0];
 
     container.innerHTML = `
       <div class="checkout-layout fade-in">
@@ -71,11 +71,8 @@ export default class Checkout {
                   <input type="text" id="shipping-postal" required placeholder="Ej: 29602" pattern="^[0-9]{5}$" title="${this.app.lang === "en" ? "Please enter a valid 5-digit postal code" : "Introduzca un código postal válido de 5 dígitos"}">
                 </div>
                 <div class="form-group flex-2">
-                  <label for="delivery-date">${this.app.t("chk_label_date", "Fecha de Entrega Programada *")}</label>
-                  <select id="delivery-date" required>
-                    <option value="${nextDays[0].iso}">${nextDays[0].formatted} (${this.app.lang === "en" ? "Tuesday Delivery" : "Logística Martes"})</option>
-                    <option value="${nextDays[1].iso}">${nextDays[1].formatted} (${this.app.lang === "en" ? "Friday Delivery" : "Logística Viernes"})</option>
-                  </select>
+                  <label for="delivery-date">${this.app.t("chk_label_date", "Fecha de Entrega Deseada (Libre) *")}</label>
+                  <input type="date" id="delivery-date" required value="${todayIso}" style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: var(--color-text-light); width: 100%; padding: 10px; border-radius: 4px; color-scheme: dark;">
                   <small class="form-hint">${this.app.t("chk_delivery_hint", "Entregas mediante transporte refrigerado certificado de 8:00 a 14:00.")}</small>
                 </div>
               </div>
@@ -474,8 +471,22 @@ export default class Checkout {
     setTimeout(() => {
       // Gather final order details
       const isBillingSame = document.getElementById("billing-same").checked;
-      const deliveryDateSelect = document.getElementById("delivery-date");
-      const deliveryDateStr = deliveryDateSelect.options[deliveryDateSelect.selectedIndex].text;
+      const deliveryDateInput = document.getElementById("delivery-date");
+      const deliveryDateIso = deliveryDateInput ? deliveryDateInput.value : "";
+      let deliveryDateStr = deliveryDateIso;
+      if (deliveryDateIso) {
+        const [y, m, d] = deliveryDateIso.split("-");
+        if (y && m && d) {
+          const dateObj = new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
+          deliveryDateStr = dateObj.toLocaleDateString(this.app.lang === "en" ? "en-US" : "es-ES", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric"
+          });
+          deliveryDateStr = deliveryDateStr.charAt(0).toUpperCase() + deliveryDateStr.slice(1);
+        }
+      }
       
       const order = {
         orderId: orderId,
