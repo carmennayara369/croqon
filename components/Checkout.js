@@ -3,6 +3,7 @@ export default class Checkout {
   constructor(app) {
     this.app = app;
     this.containerId = "main-content";
+    this.appliedDiscount = null; // { code, type: "percent"|"fixed", value }
   }
 
   render() {
@@ -23,9 +24,26 @@ export default class Checkout {
       return;
     }
 
-    const subtotal = this.app.cart.getSubtotal();
-    const vat = this.app.cart.getVAT();
-    const total = this.app.cart.getTotal();
+    const grossSubtotal = this.app.cart.getSubtotal();
+    let discountAmount = 0;
+    let discountRate = 0;
+    let discountType = null;
+
+    if (this.appliedDiscount) {
+      if (this.appliedDiscount.type === "percent") {
+        discountRate = this.appliedDiscount.value;
+        discountAmount = (grossSubtotal * discountRate) / 100;
+        discountType = "percent";
+      } else if (this.appliedDiscount.type === "fixed") {
+        discountAmount = Math.min(grossSubtotal, this.appliedDiscount.value);
+        discountRate = grossSubtotal > 0 ? (discountAmount / grossSubtotal) * 100 : 0;
+        discountType = "fixed";
+      }
+    }
+
+    const subtotal = Math.max(0, grossSubtotal - discountAmount);
+    const vat = subtotal * 0.10;
+    const total = subtotal + vat;
 
     // Calculate delivery options
     const todayIso = new Date().toISOString().split("T")[0];
@@ -192,8 +210,18 @@ export default class Checkout {
               </div>
 
               <div class="checkout-summary-totals">
+                ${(discountAmount > 0) ? `
+                  <div class="total-row">
+                    <span>${this.app.t("cat_summary_gross", "Subtotal Bruto (HT)")}</span>
+                    <span>${grossSubtotal.toFixed(2)} €</span>
+                  </div>
+                  <div class="total-row" style="color: var(--color-gold);">
+                    <span>${this.app.t("cat_summary_discount", "Descuento / Remise")} ${discountRate > 0 ? `(${discountRate.toFixed(1)}%)` : ""}</span>
+                    <span>-${discountAmount.toFixed(2)} €</span>
+                  </div>
+                ` : ""}
                 <div class="total-row">
-                  <span>${this.app.t("cat_summary_subtotal", "Base Imponible (HT)")}</span>
+                  <span>${discountAmount > 0 ? this.app.t("cat_summary_net_subtotal", "Base Imponible Neta (HT)") : this.app.t("cat_summary_subtotal", "Base Imponible (HT)")}</span>
                   <span>${subtotal.toFixed(2)} €</span>
                 </div>
                 <div class="total-row">
@@ -203,6 +231,22 @@ export default class Checkout {
                 <div class="total-row total-highlight">
                   <span>${this.app.t("cat_summary_total", "Total Facturado (TTC)")}</span>
                   <span class="golden-text">${total.toFixed(2)} €</span>
+                </div>
+              </div>
+
+              <!-- Promo Code / Remise Section -->
+              <div class="checkout-promo-box" style="margin-top: 15px; margin-bottom: 15px; padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px;">
+                <label style="font-size: 12px; color: var(--color-gold-light); display: block; margin-bottom: 6px;">
+                  ${this.app.lang === "en" ? "Commercial Discount / Promo Code" : "Código de Descuento / Remise"}
+                </label>
+                <div style="display: flex; gap: 8px;">
+                  <input type="text" id="checkout-promo-input" value="${this.appliedDiscount ? this.appliedDiscount.code : ''}" placeholder="${this.app.lang === "en" ? "e.g. REMISE10 or 10%" : "Ej: REMISE10 o 10%"}" style="flex: 1; padding: 6px 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: var(--color-text-light); border-radius: 4px; text-transform: uppercase;">
+                  <button type="button" id="btn-apply-checkout-promo" class="btn-secondary" style="padding: 6px 12px; font-size: 12px;">
+                    <span>${this.appliedDiscount ? (this.app.lang === "en" ? "Remove" : "Quitar") : (this.app.lang === "en" ? "Apply" : "Aplicar")}</span>
+                  </button>
+                </div>
+                <div id="checkout-promo-message" style="font-size: 11px; margin-top: 6px; ${this.appliedDiscount ? 'color: #2ecc71;' : ''}">
+                  ${this.appliedDiscount ? (this.app.lang === "en" ? `✓ Discount of ${discountAmount.toFixed(2)} € applied!` : `✓ ¡Descuento de ${discountAmount.toFixed(2)} € aplicado!`) : ''}
                 </div>
               </div>
 
@@ -281,6 +325,64 @@ export default class Checkout {
     if (btnBackLink) {
       btnBackLink.addEventListener("click", () => {
         this.app.navigate("catalog");
+      });
+    }
+
+    // Commercial discount / promo code handler
+    const promoBtn = document.getElementById("btn-apply-checkout-promo");
+    const promoInput = document.getElementById("checkout-promo-input");
+    const promoMsg = document.getElementById("checkout-promo-message");
+    if (promoBtn && promoInput) {
+      promoBtn.addEventListener("click", () => {
+        if (this.appliedDiscount) {
+          this.appliedDiscount = null;
+          this.render();
+          return;
+        }
+        const val = (promoInput.value || "").trim().toUpperCase();
+        if (!val) return;
+
+        // Check for percentage pattern e.g. "10%", "5%"
+        const pctMatch = val.match(/^(\d+(?:\.\d+)?)\s*%$/);
+        if (pctMatch) {
+          const rate = parseFloat(pctMatch[1]);
+          if (rate > 0 && rate <= 100) {
+            this.appliedDiscount = { code: val, type: "percent", value: rate };
+            this.render();
+            return;
+          }
+        }
+
+        if (val === "REMISE10" || val === "PROMO10" || val === "DESC10" || val === "CROQON10") {
+          this.appliedDiscount = { code: val, type: "percent", value: 10 };
+          this.render();
+          return;
+        } else if (val === "REMISE5" || val === "PROMO5" || val === "DESC5" || val === "CROQON5") {
+          this.appliedDiscount = { code: val, type: "percent", value: 5 };
+          this.render();
+          return;
+        } else if (val === "REMISE15" || val === "PROMO15" || val === "BIENVENIDA" || val === "WELCOME") {
+          this.appliedDiscount = { code: val, type: "percent", value: 15 };
+          this.render();
+          return;
+        } else if (val === "REMISE20" || val === "PROMO20") {
+          this.appliedDiscount = { code: val, type: "percent", value: 20 };
+          this.render();
+          return;
+        }
+
+        // Try direct number as percentage
+        const num = parseFloat(val);
+        if (!isNaN(num) && num > 0 && num <= 100) {
+          this.appliedDiscount = { code: `${num}%`, type: "percent", value: num };
+          this.render();
+          return;
+        }
+
+        if (promoMsg) {
+          promoMsg.style.color = "#e74c3c";
+          promoMsg.textContent = this.app.lang === "en" ? "Invalid discount code." : "Código de descuento no válido.";
+        }
       });
     }
 
@@ -488,6 +590,27 @@ export default class Checkout {
         }
       }
       
+      const grossSubtotal = this.app.cart.getSubtotal();
+      let discountAmount = 0;
+      let discountRate = 0;
+      let discountType = null;
+
+      if (this.appliedDiscount) {
+        if (this.appliedDiscount.type === "percent") {
+          discountRate = this.appliedDiscount.value;
+          discountAmount = (grossSubtotal * discountRate) / 100;
+          discountType = "percent";
+        } else if (this.appliedDiscount.type === "fixed") {
+          discountAmount = Math.min(grossSubtotal, this.appliedDiscount.value);
+          discountRate = grossSubtotal > 0 ? (discountAmount / grossSubtotal) * 100 : 0;
+          discountType = "fixed";
+        }
+      }
+
+      const netSubtotal = Math.max(0, grossSubtotal - discountAmount);
+      const vat = netSubtotal * 0.10;
+      const totalAmount = netSubtotal + vat;
+
       const order = {
         orderId: orderId,
         date: new Date().toLocaleDateString(this.app.lang === "en" ? "en-US" : "es-ES", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }),
@@ -512,9 +635,14 @@ export default class Checkout {
           cardHolder: paymentMethod === "stripe" ? document.getElementById("card-holder").value : null
         },
         items: [...this.app.cart.items],
-        subtotal: this.app.cart.getSubtotal(),
-        vat: this.app.cart.getVAT(),
-        total: this.app.cart.getTotal()
+        itemsSubtotal: grossSubtotal,
+        discountType: discountType,
+        discountRate: discountRate > 0 ? parseFloat(discountRate.toFixed(2)) : 0,
+        discountAmount: discountAmount > 0 ? parseFloat(discountAmount.toFixed(2)) : 0,
+        discount: discountAmount > 0 ? parseFloat(discountAmount.toFixed(2)) : 0,
+        subtotal: netSubtotal,
+        vat: vat,
+        total: totalAmount
       };
       // Save to application order history / session order
       this.app.lastOrder = order;

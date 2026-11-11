@@ -1,5 +1,30 @@
 // Email Preview Component - Transactional B2B Email Simulation
 export default class EmailPreview {
+  static formatProductName(rawName, isEn = false) {
+    if (!rawName) return "";
+    const lower = rawName.toLowerCase().trim();
+    const isCroquetaName = lower.startsWith("croqueta") || lower.startsWith("croquette");
+    const isNonCroqueta = lower.includes("cava") || 
+                           lower.includes("vino") || 
+                           lower.includes("wine") || 
+                           lower.includes("champagne") || 
+                           lower.includes("prosecco") ||
+                           lower.includes("cerveza") || 
+                           lower.includes("beer") ||
+                           lower.includes("licor") ||
+                           lower.includes("bebida") ||
+                           lower.includes("botella") ||
+                           lower.includes("bottle") ||
+                           lower.includes("aceite") ||
+                           lower.includes("salsa") ||
+                           lower.includes("sauce") ||
+                           lower.includes("postre");
+    if (isCroquetaName || isNonCroqueta) {
+      return rawName;
+    }
+    return isEn ? `Croquettes - ${rawName}` : `Croquetas de ${rawName}`;
+  }
+
   static renderClientEmail(order, lang = "es") {
     if (!order) return "";
 
@@ -46,17 +71,33 @@ export default class EmailPreview {
               </thead>
               <tbody>
                 ${order.items.map(item => {
-                  const name = isEn && item.name_en ? item.name_en : item.name;
+                  const rawName = isEn && item.name_en ? item.name_en : item.name;
+                  const displayName = EmailPreview.formatProductName(rawName, isEn);
+                  const formatText = item.units > 1 
+                    ? (isEn ? `Box of ${item.units} units` : `Caja de ${item.units} uds`) 
+                    : (isEn ? "1 unit / bottle" : "1 ud / botella");
                   return `
                     <tr style="border-bottom: 1px solid #eae3d2;">
-                      <td style="padding: 10px; font-size: 14px;"><strong>${name}</strong><br><span style="font-size: 12px; color: #666;">${isEn ? `Box of ${item.units} units` : `Caja de ${item.units} uds`}</span></td>
+                      <td style="padding: 10px; font-size: 14px;"><strong>${displayName}</strong><br><span style="font-size: 12px; color: #666;">${formatText}</span></td>
                       <td style="padding: 10px; text-align: center; font-size: 14px;">${item.quantity}</td>
                       <td style="padding: 10px; text-align: right; font-size: 14px;">${(item.price * item.quantity).toFixed(2)} €</td>
                     </tr>
                   `;
                 }).join("")}
+                ${(order.itemsSubtotal && (order.discountAmount > 0 || order.discount > 0)) ? `
+                  <tr>
+                    <td colspan="2" style="padding: 10px; text-align: right; font-size: 13px; color: #555;">${isEn ? "Gross Subtotal (HT)" : "Subtotal Bruto (HT)"}:</td>
+                    <td style="padding: 10px; text-align: right; font-size: 13px; color: #555;">${order.itemsSubtotal.toFixed(2)} €</td>
+                  </tr>
+                ` : ""}
+                ${(order.discountAmount > 0 || order.discount > 0) ? `
+                  <tr style="color: #b8860b;">
+                    <td colspan="2" style="padding: 10px; text-align: right; font-size: 13px; font-weight: bold;">${isEn ? `Discount ${order.discountRate ? `(${order.discountRate}%)` : ""}` : `Descuento / Remise ${order.discountRate ? `(${order.discountRate}%)` : ""}`}:</td>
+                    <td style="padding: 10px; text-align: right; font-size: 13px; font-weight: bold;">-${(order.discountAmount || order.discount).toFixed(2)} €</td>
+                  </tr>
+                ` : ""}
                 <tr>
-                  <td colspan="2" style="padding: 10px; text-align: right; font-size: 13px; color: #555;">${isEn ? "Base Imponible (HT)" : "Base Imponible (HT)"}:</td>
+                  <td colspan="2" style="padding: 10px; text-align: right; font-size: 13px; color: #555;">${isEn ? "Base Imponible (HT)" : (order.discountAmount > 0 ? "Base Imponible Neta (HT)" : "Base Imponible (HT)")}:</td>
                   <td style="padding: 10px; text-align: right; font-size: 13px; color: #555;">${order.subtotal.toFixed(2)} €</td>
                 </tr>
                 <tr>
@@ -170,10 +211,11 @@ export default class EmailPreview {
               </thead>
               <tbody>
                 ${order.items.map(item => {
-                  const name = isEn && item.name_en ? item.name_en : item.name;
+                  const rawName = isEn && item.name_en ? item.name_en : item.name;
+                  const displayName = EmailPreview.formatProductName(rawName, isEn);
                   return `
                     <tr>
-                      <td style="padding: 10px; border: 1px solid #ddd;"><strong>Croquetas de ${name}</strong></td>
+                      <td style="padding: 10px; border: 1px solid #ddd;"><strong>${displayName}</strong></td>
                       <td style="padding: 10px; border: 1px solid #ddd; text-align: center; font-weight: bold; color: #2c3e50;">${item.quantity}</td>
                       <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">${item.quantity * item.units} uds</td>
                       <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">${(item.quantity * 4.5).toFixed(1)} kg</td>
@@ -201,6 +243,18 @@ export default class EmailPreview {
                 <td style="width: 150px; padding: 5px 0; color: #666;">${isEn ? "Method:" : "Método Elegido:"}</td>
                 <td><strong>${order.payment.method.toUpperCase()}</strong></td>
               </tr>
+              ${(order.itemsSubtotal && (order.discountAmount > 0 || order.discount > 0)) ? `
+                <tr>
+                  <td style="padding: 5px 0; color: #666;">${isEn ? "Gross Subtotal:" : "Subtotal Bruto (HT):"}</td>
+                  <td><strong>${order.itemsSubtotal.toFixed(2)} €</strong></td>
+                </tr>
+              ` : ""}
+              ${(order.discountAmount > 0 || order.discount > 0) ? `
+                <tr>
+                  <td style="padding: 5px 0; color: #666;">${isEn ? "Discount Applied:" : "Descuento / Remise:"}</td>
+                  <td><strong style="color: #b8860b;">-${(order.discountAmount || order.discount).toFixed(2)} € ${order.discountRate ? `(${order.discountRate}%)` : ""}</strong></td>
+                </tr>
+              ` : ""}
               <tr>
                 <td style="padding: 5px 0; color: #666;">${isEn ? "Amount:" : "Importe Total:"}</td>
                 <td><strong>${order.total.toFixed(2)} € (${isEn ? "VAT Inc." : "IVA Inc."})</strong> [HT: ${order.subtotal.toFixed(2)} €]</td>

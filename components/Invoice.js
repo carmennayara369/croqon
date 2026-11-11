@@ -100,18 +100,57 @@ export default class Invoice {
           </thead>
           <tbody>
             ${order.items.map(item => {
-              const name = isEn && item.name_en ? item.name_en : item.name;
-              const formatText = isSample 
-                ? (isEn ? "Loose units (samples)" : "Unidades sueltas (muestras)")
-                : (isEn ? `Box of ${item.units} units` : `Caja de ${item.units} uds`);
+              const rawName = isEn && item.name_en ? item.name_en : item.name;
+              const lower = (rawName || "").toLowerCase().trim();
+              
+              const isCroquetaName = lower.startsWith("croqueta") || lower.startsWith("croquette");
+              const isNonCroqueta = lower.includes("cava") || 
+                                     lower.includes("vino") || 
+                                     lower.includes("wine") || 
+                                     lower.includes("champagne") || 
+                                     lower.includes("prosecco") ||
+                                     lower.includes("cerveza") || 
+                                     lower.includes("beer") ||
+                                     lower.includes("licor") ||
+                                     lower.includes("bebida") ||
+                                     lower.includes("botella") ||
+                                     lower.includes("bottle") ||
+                                     lower.includes("aceite") ||
+                                     lower.includes("salsa") ||
+                                     lower.includes("sauce") ||
+                                     lower.includes("postre");
+
+              let displayName = rawName;
+              if (!isCroquetaName && !isNonCroqueta) {
+                displayName = isEn ? `Croquettes - ${rawName}` : `Croquetas de ${rawName}`;
+              }
+
+              let subtitle = isEn ? "Premium Range - Flash-frozen ready to fry" : "Gama Premium - Producto Ultracongelado listo para freír";
+              if (isNonCroqueta) {
+                subtitle = item.badge || (isEn ? "Gourmet Selection - Premium Quality" : "Selección Gourmet - Calidad Especial");
+              }
+
+              let formatText = "";
+              if (isSample) {
+                formatText = isEn ? "Loose units (samples)" : "Unidades sueltas (muestras)";
+              } else if (isNonCroqueta) {
+                formatText = (item.units > 1) 
+                  ? (isEn ? `Pack of ${item.units} units` : `Caja / Pack de ${item.units} uds`) 
+                  : (isEn ? "1 unit / bottle" : "1 botella / ud");
+              } else {
+                formatText = (item.units === 1) 
+                  ? (isEn ? "1 unit" : "1 ud") 
+                  : (isEn ? `Box of ${item.units} units` : `Caja de ${item.units} uds`);
+              }
+
               const itemPrice = isSample ? 0.00 : item.price;
               const itemTotal = isSample ? 0.00 : (item.price * item.quantity);
 
               return `
                 <tr>
                   <td>
-                    <strong>Croquetas de ${name}</strong><br>
-                    <small>${isEn ? "Premium Range - Flash-frozen ready to fry" : "Gama Premium - Producto Ultracongelado listo para freír"}</small>
+                    <strong>${displayName}</strong><br>
+                    <small>${subtitle}</small>
                   </td>
                   <td class="text-center">${formatText}</td>
                   <td class="text-right">${itemPrice.toFixed(2)} €</td>
@@ -145,8 +184,20 @@ export default class Invoice {
           
           <div class="invoice-summary-table-wrap">
             <table class="invoice-totals-table">
+              ${(order.itemsSubtotal && (order.discountAmount > 0 || order.discount > 0)) ? `
+                <tr>
+                  <td>${isEn ? "Gross Subtotal (HT)" : "Subtotal Bruto (HT)"}</td>
+                  <td class="text-right">${order.itemsSubtotal.toFixed(2)} €</td>
+                </tr>
+              ` : ""}
+              ${(order.discountAmount > 0 || order.discount > 0) ? `
+                <tr style="color: #b8860b;">
+                  <td>${isEn ? `Discount ${order.discountRate ? `(${order.discountRate}%)` : ""}` : `Descuento / Remise ${order.discountRate ? `(${order.discountRate}%)` : ""}`}</td>
+                  <td class="text-right">-${(order.discountAmount || order.discount).toFixed(2)} €</td>
+                </tr>
+              ` : ""}
               <tr>
-                <td>${isEn ? "Base Imponible (HT)" : "Base Imponible (HT)"}</td>
+                <td>${isEn ? "Base Imponible (HT)" : (order.discountAmount > 0 ? "Base Imponible Neta (HT)" : "Base Imponible (HT)")}</td>
                 <td class="text-right">${order.subtotal.toFixed(2)} €</td>
               </tr>
               <tr>

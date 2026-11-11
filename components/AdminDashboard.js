@@ -12,6 +12,31 @@ export default class AdminDashboard {
     this.selectedClientCif = null;
   }
 
+  formatProductName(rawName, isEn = false) {
+    if (!rawName) return "";
+    const lower = rawName.toLowerCase().trim();
+    const isCroquetaName = lower.startsWith("croqueta") || lower.startsWith("croquette");
+    const isNonCroqueta = lower.includes("cava") || 
+                           lower.includes("vino") || 
+                           lower.includes("wine") || 
+                           lower.includes("champagne") || 
+                           lower.includes("prosecco") ||
+                           lower.includes("cerveza") || 
+                           lower.includes("beer") ||
+                           lower.includes("licor") ||
+                           lower.includes("bebida") ||
+                           lower.includes("botella") ||
+                           lower.includes("bottle") ||
+                           lower.includes("aceite") ||
+                           lower.includes("salsa") ||
+                           lower.includes("sauce") ||
+                           lower.includes("postre");
+    if (isCroquetaName || isNonCroqueta) {
+      return rawName;
+    }
+    return isEn ? `Croquettes - ${rawName}` : `Croquetas de ${rawName}`;
+  }
+
   getOrders() {
     try {
       const restoredDefaultOrders = [
@@ -329,7 +354,7 @@ export default class AdminDashboard {
             ` : flavorSales.map((f, i) => `
               <div class="sales-bar-item">
                 <div class="bar-label-row">
-                  <span class="bar-name"><strong>${i+1}.</strong> Croquetas de ${f.name}</span>
+                  <span class="bar-name"><strong>${i+1}.</strong> ${this.formatProductName(f.name)}</span>
                   <span class="bar-val">${f.qty} cajas</span>
                 </div>
                 <div class="bar-outer">
@@ -613,13 +638,25 @@ export default class AdminDashboard {
             <tbody>
               ${order.items.map(item => `
                 <tr>
-                  <td>Croquetas de ${item.name} <small>(${isSample ? "Degustación" : `${item.units} uds`})</small></td>
+                  <td>${this.formatProductName(item.name)} <small>(${isSample ? "Degustación" : `${item.units} uds`})</small></td>
                   <td class="text-center"><strong>${item.quantity}</strong></td>
                   <td class="text-right">${isSample ? "0.00 €" : `${(item.price * item.quantity).toFixed(2)} €`}</td>
                 </tr>
               `).join("")}
+              ${(order.itemsSubtotal && (order.discountAmount > 0 || order.discount > 0)) ? `
+                <tr class="detail-totals-tr">
+                  <td>Subtotal Bruto (HT)</td>
+                  <td colspan="2" class="text-right">${order.itemsSubtotal.toFixed(2)} €</td>
+                </tr>
+              ` : ""}
+              ${(order.discountAmount > 0 || order.discount > 0) ? `
+                <tr class="detail-totals-tr" style="color: var(--color-gold);">
+                  <td>Descuento / Remise ${order.discountRate ? `(${order.discountRate}%)` : ""}</td>
+                  <td colspan="2" class="text-right">-${(order.discountAmount || order.discount).toFixed(2)} €</td>
+                </tr>
+              ` : ""}
               <tr class="detail-totals-tr">
-                <td>Base Imponible (HT)</td>
+                <td>${(order.discountAmount > 0 || order.discount > 0) ? "Base Imponible Neta (HT)" : "Base Imponible (HT)"}</td>
                 <td colspan="2" class="text-right">${order.subtotal.toFixed(2)} €</td>
               </tr>
               <tr>
@@ -806,15 +843,16 @@ export default class AdminDashboard {
 
           <!-- Product quantities section -->
           <div class="detail-section-box" style="margin-top: 20px;">
-            <h4 style="margin-bottom: 12px; color: var(--color-gold-light);">Unidades en Pedido (Cajas de 150 uds / 70 uds)</h4>
+            <h4 style="margin-bottom: 12px; color: var(--color-gold-light);">Unidades en Pedido (Productos y Cajas)</h4>
             <div class="manual-products-list" style="display: flex; flex-direction: column; gap: 12px;">
               ${products.map(p => {
                 const name = this.app.lang === "en" && p.name_en ? p.name_en : p.name;
+                const formatLabel = p.units > 1 ? `Caja de ${p.units} uds` : `1 ud / botella`;
                 return `
                   <div class="manual-prod-row" style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 8px;">
                     <div style="flex: 1; padding-right: 15px;">
                       <strong style="font-size: 13px; color: var(--color-text-light);">${name}</strong><br>
-                      <small style="color: var(--color-text-muted); font-size: 11px;">Caja de ${p.units} uds | ${p.price.toFixed(2)} €/caja HT | Stock: <strong>${Math.floor(p.stock / p.units)} cjs</strong></small>
+                      <small style="color: var(--color-text-muted); font-size: 11px;">${formatLabel} | ${p.price.toFixed(2)} € HT | Stock: <strong>${Math.floor(p.stock / p.units)} ${p.units > 1 ? 'cjs' : 'uds'}</strong></small>
                     </div>
                     <div style="width: 80px;">
                       <input type="number" class="manual-qty-input" data-prod-id="${p.id}" value="0" min="0" max="${Math.floor(p.stock / p.units)}" style="text-align: center; font-weight: bold; width: 100%; padding: 6px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: var(--color-text-light); border-radius: 4px;">
@@ -822,6 +860,52 @@ export default class AdminDashboard {
                   </div>
                 `;
               }).join("")}
+            </div>
+          </div>
+
+          <!-- Commercial Discount Section (Remise commerciale) -->
+          <div class="detail-section-box" style="margin-top: 20px; background: rgba(197, 168, 128, 0.05); border: 1px solid rgba(197, 168, 128, 0.25); border-radius: 6px; padding: 15px;">
+            <h4 style="margin-bottom: 12px; color: var(--color-gold-light); display: flex; align-items: center; justify-content: space-between;">
+              <span>🏷️ Descuento Comercial / Remise</span>
+              <span style="font-size: 11px; color: var(--color-text-muted); font-weight: normal;">Opcional</span>
+            </h4>
+            <div class="form-row" style="display: flex; gap: 15px;">
+              <div class="form-group" style="flex: 1;">
+                <label for="manual-discount-type" style="font-size: 12px; color: var(--color-text-light);">Tipo de Remise</label>
+                <select id="manual-discount-type" style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: var(--color-text-light); width: 100%; padding: 8px; border-radius: 4px;">
+                  <option value="none">Sin descuento (0%)</option>
+                  <option value="percent">Porcentaje (%)</option>
+                  <option value="fixed">Importe fijo (€ HT)</option>
+                </select>
+              </div>
+              <div class="form-group" style="flex: 1;">
+                <label for="manual-discount-val" style="font-size: 12px; color: var(--color-text-light);">Valor del Descuento</label>
+                <input type="number" id="manual-discount-val" min="0" step="0.01" value="0" placeholder="0" style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: var(--color-text-light); width: 100%; padding: 8px; border-radius: 4px;">
+              </div>
+            </div>
+
+            <!-- Live Calculation Summary -->
+            <div id="manual-order-calculation-preview" style="margin-top: 15px; padding: 12px; background: rgba(0,0,0,0.35); border-radius: 4px; font-size: 13px; border: 1px solid rgba(255,255,255,0.05);">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                <span style="color: var(--color-text-muted);">Subtotal Bruto (HT):</span>
+                <span id="preview-gross-subtotal" style="font-weight: bold; color: var(--color-text-light);">0.00 €</span>
+              </div>
+              <div id="preview-discount-row" style="display: none; justify-content: space-between; margin-bottom: 5px; color: var(--color-gold);">
+                <span id="preview-discount-label">Remise:</span>
+                <span id="preview-discount-amount" style="font-weight: bold;">-0.00 €</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                <span style="color: var(--color-text-muted);">Base Imponible Neta (HT):</span>
+                <span id="preview-net-subtotal" style="font-weight: bold; color: var(--color-text-light);">0.00 €</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                <span style="color: var(--color-text-muted);">IVA (10%):</span>
+                <span id="preview-vat" style="color: var(--color-text-light);">0.00 €</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px; margin-top: 6px;">
+                <span style="color: var(--color-gold-light); font-weight: bold;">Total Final (TTC):</span>
+                <span id="preview-grand-total" style="color: var(--color-gold); font-weight: bold; font-size: 15px;">0.00 €</span>
+              </div>
             </div>
           </div>
 
@@ -1637,9 +1721,68 @@ export default class AdminDashboard {
         });
       }
 
-      // Manual order form submit handler
+      // Manual order form live preview & submit handler
       const manualOrderForm = document.getElementById("admin-manual-order-form");
       if (manualOrderForm) {
+        const updateManualOrderPreview = () => {
+          let grossSubtotal = 0;
+          const prods = this.app.getProducts();
+          document.querySelectorAll(".manual-qty-input").forEach(input => {
+            const qty = parseInt(input.value) || 0;
+            const prod = prods.find(p => p.id === input.dataset.prodId);
+            if (prod && qty > 0) {
+              grossSubtotal += prod.price * qty;
+            }
+          });
+
+          const discType = document.getElementById("manual-discount-type") ? document.getElementById("manual-discount-type").value : "none";
+          const discVal = parseFloat(document.getElementById("manual-discount-val") ? document.getElementById("manual-discount-val").value : 0) || 0;
+
+          let discountAmount = 0;
+          let discountRate = 0;
+          if (discType === "percent" && discVal > 0) {
+            discountRate = Math.min(100, Math.max(0, discVal));
+            discountAmount = (grossSubtotal * discountRate) / 100;
+          } else if (discType === "fixed" && discVal > 0) {
+            discountAmount = Math.min(grossSubtotal, discVal);
+            discountRate = grossSubtotal > 0 ? (discountAmount / grossSubtotal) * 100 : 0;
+          }
+
+          const netSubtotal = Math.max(0, grossSubtotal - discountAmount);
+          const vat = netSubtotal * 0.10;
+          const total = netSubtotal + vat;
+
+          const grossEl = document.getElementById("preview-gross-subtotal");
+          const discRow = document.getElementById("preview-discount-row");
+          const discLabel = document.getElementById("preview-discount-label");
+          const discAmountEl = document.getElementById("preview-discount-amount");
+          const netEl = document.getElementById("preview-net-subtotal");
+          const vatEl = document.getElementById("preview-vat");
+          const grandEl = document.getElementById("preview-grand-total");
+
+          if (grossEl) grossEl.textContent = `${grossSubtotal.toFixed(2)} €`;
+          if (discRow) {
+            if (discountAmount > 0) {
+              discRow.style.display = "flex";
+              if (discLabel) discLabel.textContent = discType === "percent" ? `Remise (${discountRate.toFixed(1)}%):` : "Remise fixe:";
+              if (discAmountEl) discAmountEl.textContent = `-${discountAmount.toFixed(2)} €`;
+            } else {
+              discRow.style.display = "none";
+            }
+          }
+          if (netEl) netEl.textContent = `${netSubtotal.toFixed(2)} €`;
+          if (vatEl) vatEl.textContent = `${vat.toFixed(2)} €`;
+          if (grandEl) grandEl.textContent = `${total.toFixed(2)} €`;
+        };
+
+        document.querySelectorAll(".manual-qty-input").forEach(input => {
+          input.addEventListener("input", updateManualOrderPreview);
+        });
+        const manualDiscType = document.getElementById("manual-discount-type");
+        const manualDiscVal = document.getElementById("manual-discount-val");
+        if (manualDiscType) manualDiscType.addEventListener("change", updateManualOrderPreview);
+        if (manualDiscVal) manualDiscVal.addEventListener("input", updateManualOrderPreview);
+
         manualOrderForm.addEventListener("submit", (e) => {
           e.preventDefault();
 
@@ -1708,20 +1851,35 @@ export default class AdminDashboard {
           }
 
           // Validation
-          if (totalBoxes < 2) {
+          if (totalBoxes < 1) {
             alert(this.app.lang === "en" 
-              ? "Minimum order volume is 2 boxes. Please adjust quantities." 
-              : "El volumen mínimo de pedido profesional es de 2 cajas. Ajuste las cantidades.");
+              ? "Please select at least 1 product quantity." 
+              : "Por favor, seleccione al menos 1 unidad de producto.");
             return;
           }
 
-          // Calculate subtotal, vat, total
-          let subtotal = 0;
+          // Calculate gross subtotal, discount, net subtotal, vat, total
+          let grossSubtotal = 0;
           orderItems.forEach(item => {
-            subtotal += item.price * item.quantity;
+            grossSubtotal += item.price * item.quantity;
           });
-          const vat = subtotal * 0.10;
-          const total = subtotal + vat;
+
+          const discType = document.getElementById("manual-discount-type") ? document.getElementById("manual-discount-type").value : "none";
+          const discVal = parseFloat(document.getElementById("manual-discount-val") ? document.getElementById("manual-discount-val").value : 0) || 0;
+
+          let discountAmount = 0;
+          let discountRate = 0;
+          if (discType === "percent" && discVal > 0) {
+            discountRate = Math.min(100, Math.max(0, discVal));
+            discountAmount = (grossSubtotal * discountRate) / 100;
+          } else if (discType === "fixed" && discVal > 0) {
+            discountAmount = Math.min(grossSubtotal, discVal);
+            discountRate = grossSubtotal > 0 ? (discountAmount / grossSubtotal) * 100 : 0;
+          }
+
+          const netSubtotal = Math.max(0, grossSubtotal - discountAmount);
+          const vat = netSubtotal * 0.10;
+          const total = netSubtotal + vat;
 
           // Generate order ID
           const orderId = "CRQ-" + Math.floor(100000 + Math.random() * 90000);
@@ -1754,7 +1912,12 @@ export default class AdminDashboard {
               cardHolder: paymentMethod === "stripe" ? "Gestión Admin" : null
             },
             items: orderItems,
-            subtotal: subtotal,
+            itemsSubtotal: grossSubtotal,
+            discountType: discType !== "none" && discountAmount > 0 ? discType : null,
+            discountRate: discountRate > 0 ? parseFloat(discountRate.toFixed(2)) : 0,
+            discountAmount: discountAmount > 0 ? parseFloat(discountAmount.toFixed(2)) : 0,
+            discount: discountAmount > 0 ? parseFloat(discountAmount.toFixed(2)) : 0,
+            subtotal: netSubtotal,
             vat: vat,
             total: total,
             logisticsStatus: "pending"
